@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="style.css" />
+        <title>DragonRuby Game Toolkit Tutorial</title>
+    </head>
+    <body id='toplevel'>
+        <script>
+         window.gtk = {}
+         window.gtk.starting = function() {
+           save();
+           editor.focus();
+         }
+        </script>
+
+        <a id="tutorial-prev" href="#" onclick="tutorial_prev()">prev<br/>step</a>
+        <a id="tutorial-next" href="#" onclick="tutorial_next()">next<br/>step</a>
+
+        <div id="tutorial" style="width: 960px; height: 270px;">
+        </div>
+
+        <!-- <div id="reference-code" style="width: 480px; height: 270px;">
+             </div>
+        -->
+        <div id="editor" style="width: 480px; height: 270px;">
+        </div>
+
+        <iframe src="game.html" width="480" height="270"></iframe>
+
+        <script>
+         function hotload() {
+           save();
+           editor.focus();
+         }
+
+         function save() {
+           window.gtk.saveMain(editor.getValue());
+         }
+
+         window.addEventListener('load', function() {
+           setTimeout(function() {
+             editor.setValue(document.getElementById('main.rb').innerHTML.trim());
+             editor.focus();
+             editor.gotoLine(0);
+             editor.clearSelection();
+             tutorial_start();
+           }, 1000);
+         });
+
+         document.addEventListener('keydown', function(event) {
+           var S = 83,
+               activeElement = document.activeElement;
+
+           if ((event.key === S || event.keyCode === S) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
+             event.preventDefault();
+             save();
+           }
+         });
+        </script>
+
+        <script src="lib/ace.js"></script>
+        <script src="lib/screenfull.min.js"></script>
+        <script src="lib/browserfs.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+        <script src="lib/popper.min.js"></script>
+        <script src="lib/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+        <script>
+         var editor = ace.edit("editor");
+         editor.setTheme("ace/theme/monokai");
+         editor.session.setMode("ace/mode/ruby");
+
+         editor.setFontSize("14px");
+         editor.commands.addCommand({
+           name: "save",
+           exec: save,
+           bindKey: {mac: "cmd-s", win: "ctrl-s"}
+         });
+
+         editor.commands.addCommand({
+           name: "save 2",
+           exec: save,
+           bindKey: {mac: "ctrl-s", win: "alt-s"}
+         });
+
+         editor.commands.addCommand({
+           name: "next",
+           exec: function() { tutorial_next(); },
+           bindKey: {mac: "ctrl-n", win: "ctrl-n"}
+         });
+
+         editor.commands.addCommand({
+           name: "prev",
+           exec: function() { tutorial_prev(); },
+           bindKey: {mac: "ctrl-p", win: "ctrl-p"}
+         });
+
+         editor.tabSize = 2;
+
+         editor.session.setOptions({
+           tabSize: 2,
+           useSoftTabs: true,
+         });
+
+         var heightUpdateFunction = function() {
+
+           // http://stackoverflow.com/questions/11584061/
+           var newHeight =
+             editor.getSession().getScreenLength() * editor.renderer.lineHeight + editor.renderer.scrollBar.getWidth();
+
+           $('#editor').height("270px");
+           $('#editor-section').height("270px");
+
+           // This call is required for the editor to fix all of
+           // its inner structure for adapting to a change in size
+           editor.resize();
+         };
+
+         // Set initial size to match initial content
+         heightUpdateFunction();
+
+         // Whenever a change happens inside the ACE editor, update
+         // the size again
+         editor.getSession().on('change', heightUpdateFunction);
+
+         /* var reference_code = ace.edit("reference-code");
+          * reference_code.setTheme("ace/theme/monokai");
+          * reference_code.session.setMode("ace/mode/ruby");
+          * reference_code.setFontSize("14px");
+          * reference_code.setReadOnly('true');
+          */
+        </script>
+
+        <script id="main.rb" type='text/ruby'>
+def tick args
+end
+        </script>
+
+        <script class="tutorial-step" type="text/html" data-tutorial-step="1">
+            <h1>DragonRuby Primer</h1>
+            <p>
+                This tutorial is going to give you a crash course of DragonRuby Game Toolkit. Let's get started shall we?
+                <br/>
+                <br/>
+                Click the link in the top right corner that says <b>"next step"</b> to continue.
+            </p>
+        </script>
+
+        <script class="tutorial-step" type="text/html" data-tutorial-step="2">
+            <h1>Rendering a Label</h1>
+            <p>
+                Do you see the code editor directly <b>below</b> this box? Click in there and type the following:
+                <br/>
+            </p>
+
+            <pre>def tick args
+  args.outputs.labels << [30, 30, "hello world"]
+end</pre>
+
+            <p>
+                Once you've typed the code above. Press "Ctrl + S" (or "Cmd + S" if you're on a Mac) to run the game. Play around with the numbers and see how the label moves around. Click <b>"next step"</b> whenever you're ready.
+            </p>
+        </script>
+
+        <script>
+         var current_tutorial_step = 1;
+         var tutorial = {};
+         function tutorial_start() {
+           var tutorial_elements = document.getElementsByClassName("tutorial-step");
+           for (var i = 0; i < tutorial_elements.length; i++) {
+             var element = tutorial_elements[i];
+             var step = element.getAttribute("data-tutorial-step");
+             if (!tutorial[step]) {
+               tutorial[step] = {
+                 text: "",
+                 code: ""
+               }
+             }
+
+             if (element.type == "text/html") {
+               tutorial[step].text = element.innerHTML;
+             }
+           }
+
+           tutorial_load_step(current_tutorial_step);
+         }
+
+         function tutorial_prev() {
+           var next_step = current_tutorial_step - 1;
+           if (tutorial[next_step.toString()]) {
+             current_tutorial_step -= 1;
+             tutorial_load_step(current_tutorial_step);
+           }
+         }
+
+         function tutorial_next() {
+           var next_step = current_tutorial_step + 1;
+           if (tutorial[next_step.toString()]) {
+             current_tutorial_step += 1;
+             tutorial_load_step(current_tutorial_step);
+           }
+         }
+
+         function tutorial_load_step(number) {
+           var tutorial_step = tutorial[number.toString()];
+           document.getElementById("tutorial").innerHTML = tutorial_step.text;
+           /* reference_code.setValue(tutorial_step.code);
+            * reference_code.gotoLine(0);
+            * reference_code.clearSelection(); */
+         }
+        </script>
+    </body>
+</html>

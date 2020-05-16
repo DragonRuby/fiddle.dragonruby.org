@@ -1,0 +1,6 @@
+devid=dragonruby
+devtitle=DragonRuby
+gameid=fantasy-console
+gametitle=Fantasy Console
+version=1.0
+icon=metadata/icon.png

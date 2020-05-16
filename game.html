@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en-us">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="game.css" />
+    <title>DragonRuby Game Toolkit Tutorial</title>
+  </head>
+  <body id='toplevel'>
+    <div class="emscripten_border" id='borderdiv'>
+      <input id="game-input" autocomplete="off" />
+      <canvas class="game emscripten" id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    </div>
+    <br/>
+    <textarea style="display: none;" id="output" rows="8"></textarea>
+
+    <div class="emscripten" id="status"></div>
+    <div class="emscripten" id='progressdiv'>
+      <progress value="0" max="100" id="progress"></progress>
+    </div>
+
+    <script type='text/javascript' src='dragonruby-html5-loader.js'></script>
+  </body>
+</html>

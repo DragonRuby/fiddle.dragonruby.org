@@ -1,0 +1,154 @@
+div {
+    padding: 0px;
+    border: 0px;
+    margin: 0px;
+    position: absolute;
+}
+
+body {
+    border: solid 1px #000000;
+    margin-left:  auto;
+    margin-right: auto;
+    min-width: 960px;
+    min-height: 540px;
+    width: 960px;
+    height: 540px;
+    position: relative;
+    background-color: rgb(40, 44, 52);
+    font-family: monospace;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+#vim-editor {
+    width: 480px;
+    height: 540px;
+}
+
+#vim-screen {
+    width: 480px;
+    height: 540px;
+}
+
+#vim-input {
+    width: 1px;
+    color: transparent;
+    background-color: transparent;
+    padding: 0px;
+    border: 0px;
+    outline: none;
+    vertical-align: middle;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+}
+
+iframe {
+    position: absolute;
+    width: 480px;
+    height: 270px;
+    left: 480px;
+    top: 270px;
+}
+
+#borderdiv {
+}
+
+.clear-both {
+    clear: both;
+}
+
+iframe {
+    margin: 0px;
+    padding: 0px;
+    overflow: hidden;
+    border: solid 1px #000000;
+}
+
+textarea {
+    border: none;
+    resize: none;
+    margin: 0px;
+    padding: 0px;
+    padding-left: 10px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 480px;
+    height: 270px;
+    font-family: monospace;
+    font-size: 16px;
+    color: white;
+    wrap: soft;
+    background-color: rgb(40, 44, 52);
+    outline:0px !important;
+    -webkit-appearance:none;
+    box-shadow: none !important;
+}
+
+#editor {
+    top: 270px;
+    border: solid 1px #000000;
+    height: 270px;
+}
+
+#reference-code {
+    position: absolute;
+    left: 480px;
+    border: solid 1px #000000;
+}
+
+.ace_editor {
+    height: 100%;
+    background: rgb(40, 44, 52) !important;
+}
+
+.ace_content {
+    background: rgb(40, 44, 52) !important;
+}
+
+.ace_gutter {
+    background: rgb(40, 44, 52) !important;
+}
+
+#tutorial {
+    border: solid 1px #000000;
+    font-size: 18px;
+}
+
+#tutorial h1 {
+    margin: 10px;
+    border-bottom: 1px solid silver;
+}
+
+#tutorial p {
+    margin: 10px;
+}
+
+#tutorial pre {
+    margin: 10px;
+    padding: 5px;
+    background: rgb(50, 54, 62) !important;
+}
+
+#tutorial-next {
+    left: 903px;
+    top: 11px;
+    color: #FFFFFF;
+    z-index: 100;
+    position: absolute;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 0.8em;
+}
+
+#tutorial-prev {
+    left: 833px;
+    top: 11px;
+    color: #FFFFFF;
+    z-index: 100;
+    position: absolute;
+    font-weight: 900;
+    font-size: 20px;
+    line-height: 0.8em;
+}
