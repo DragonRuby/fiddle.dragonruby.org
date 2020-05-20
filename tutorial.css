@@ -1,0 +1,111 @@
+@font-face {
+    font-family: 'firacode';
+    src: url('firacode.ttf');
+}
+
+pre code {
+  animation-name: node-ready;
+  animation-duration: 0.001s;
+}
+
+@keyframes node-ready {
+  from { clip: rect(1px, auto, auto, auto); }
+  to { clip: rect(0px, auto, auto, auto); }
+}
+
+h1 {
+    line-height: 1.2em;
+}
+
+body {
+    padding: 10px;
+    margin-left:  auto;
+    margin-right: auto;
+    min-width: 480px;
+    min-height: 540px;
+    width: 480px;
+    background-color: rgb(40, 44, 52);
+    font-family: 'firacode';
+    font-size: 16px;
+    color: #ffffff;
+    line-height: 1.2em;
+}
+
+.fade-in {
+    animation: fadeIn ease 1s;
+    -webkit-animation: fadeIn ease 1s;
+    -moz-animation: fadeIn ease 1s;
+    -o-animation: fadeIn ease 1s;
+    -ms-animation: fadeIn ease 1s;
+}
+
+@keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-moz-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-webkit-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-o-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+@-ms-keyframes fadeIn {
+    0% {opacity:0;}
+    100% {opacity:1;}
+}
+
+pre {
+    font-size: 14px;
+    margin: 0px;
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+}
+
+code {
+    background-color: rgb(70, 74, 82) !important;
+    padding: 1px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+}
+
+pre code {
+    font-family: 'firacode';
+    display: block;
+    overflow-x: auto;
+    padding: 0.5em;
+    background-color: rgb(50, 54, 62) !important;
+    color: rgb(50, 54, 62);
+    font-size: 16px;
+}
+
+.hljs {
+    background-color: rgb(50, 54, 62) !important;
+    color: rgb(252, 253, 252) !important;
+    font-size: 16px;
+}
+
+.hljs-keyword {
+    color: rgb(50, 180, 180) !important;
+}
+
+.hljs-title {
+    color: rgb(250, 220, 100) !important;
+}
+
+.hljs-number {
+    color: rgb(255, 100, 100) !important;
+}

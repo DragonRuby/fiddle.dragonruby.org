@@ -4,6 +4,7 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="style.css" />
         <title>DragonRuby Game Toolkit Tutorial</title>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.js"></script>
     </head>
     <body id='toplevel'>
         <script>
@@ -16,17 +17,15 @@
 
         <a id="tutorial-prev" href="#" onclick="tutorial_prev()">prev<br/>step</a>
         <a id="tutorial-next" href="#" onclick="tutorial_next()">next<br/>step</a>
+        <span id="tutorial-link-pointer">Use these links to<br/> navigate the tutorial →</span>
 
-        <div id="tutorial" style="width: 960px; height: 270px;">
+        <div id="editor"></div>
+
+        <div id="tutorial">
         </div>
 
-        <!-- <div id="reference-code" style="width: 480px; height: 270px;">
-             </div>
-        -->
-        <div id="editor" style="width: 480px; height: 270px;">
-        </div>
 
-        <iframe src="game.html" width="480" height="270"></iframe>
+        <iframe src="game.html"></iframe>
 
         <script>
          function hotload() {
@@ -40,11 +39,10 @@
 
          window.addEventListener('load', function() {
            setTimeout(function() {
-             editor.setValue(document.getElementById('main.rb').innerHTML.trim());
              editor.focus();
              editor.gotoLine(0);
              editor.clearSelection();
-             tutorial_start();
+             tutorial_retrieve();
            }, 1000);
          });
 
@@ -109,8 +107,8 @@
            var newHeight =
              editor.getSession().getScreenLength() * editor.renderer.lineHeight + editor.renderer.scrollBar.getWidth();
 
-           $('#editor').height("270px");
-           $('#editor-section').height("270px");
+           $('#editor').height("540px");
+           $('#editor-section').height("540px");
 
            // This call is required for the editor to fix all of
            // its inner structure for adapting to a change in size
@@ -132,82 +130,64 @@
           */
         </script>
 
-        <script id="main.rb" type='text/ruby'>
-def tick args
-end
-        </script>
-
-        <script class="tutorial-step" type="text/html" data-tutorial-step="1">
-            <h1>DragonRuby Primer</h1>
-            <p>
-                This tutorial is going to give you a crash course of DragonRuby Game Toolkit. Let's get started shall we?
-                <br/>
-                <br/>
-                Click the link in the top right corner that says <b>"next step"</b> to continue.
-            </p>
-        </script>
-
-        <script class="tutorial-step" type="text/html" data-tutorial-step="2">
-            <h1>Rendering a Label</h1>
-            <p>
-                Do you see the code editor directly <b>below</b> this box? Click in there and type the following:
-                <br/>
-            </p>
-
-            <pre>def tick args
-  args.outputs.labels << [30, 30, "hello world"]
-end</pre>
-
-            <p>
-                Once you've typed the code above. Press "Ctrl + S" (or "Cmd + S" if you're on a Mac) to run the game. Play around with the numbers and see how the label moves around. Click <b>"next step"</b> whenever you're ready.
-            </p>
-        </script>
-
         <script>
+         var tutorial = { steps: { } };
          var current_tutorial_step = 1;
-         var tutorial = {};
+
          function tutorial_start() {
-           var tutorial_elements = document.getElementsByClassName("tutorial-step");
-           for (var i = 0; i < tutorial_elements.length; i++) {
-             var element = tutorial_elements[i];
-             var step = element.getAttribute("data-tutorial-step");
-             if (!tutorial[step]) {
-               tutorial[step] = {
-                 text: "",
-                 code: ""
-               }
-             }
-
-             if (element.type == "text/html") {
-               tutorial[step].text = element.innerHTML;
-             }
-           }
-
            tutorial_load_step(current_tutorial_step);
          }
 
          function tutorial_prev() {
+           document.getElementById("tutorial-link-pointer").style.display = 'none';
            var next_step = current_tutorial_step - 1;
-           if (tutorial[next_step.toString()]) {
+           if (tutorial.steps[next_step.toString()]) {
              current_tutorial_step -= 1;
              tutorial_load_step(current_tutorial_step);
            }
          }
 
          function tutorial_next() {
+           document.getElementById("tutorial-link-pointer").style.display = 'none';
            var next_step = current_tutorial_step + 1;
-           if (tutorial[next_step.toString()]) {
+           if (tutorial.steps[next_step.toString()]) {
              current_tutorial_step += 1;
              tutorial_load_step(current_tutorial_step);
            }
          }
 
          function tutorial_load_step(number) {
-           var tutorial_step = tutorial[number.toString()];
-           document.getElementById("tutorial").innerHTML = tutorial_step.text;
-           /* reference_code.setValue(tutorial_step.code);
-            * reference_code.gotoLine(0);
-            * reference_code.clearSelection(); */
+           var tutorial_step = tutorial.steps[number.toString()];
+           document.getElementById("tutorial").innerHTML = tutorial_step.text.outerHTML;
+           editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + N for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
+           editor.gotoLine(0);
+           editor.clearSelection();
+         }
+
+         function tutorial_retrieve() {
+           reqwest('warpdrive-tutorial.html', function (resp) {
+             var script = document.createElement("script");
+             script.id = "retrieved-tutorial";
+             script.type = "text/tutorial";
+             script.innerHTML = resp;
+             document.body.appendChild(script);
+             var div = document.createElement("div");
+             div.innerHTML = document.getElementById("retrieved-tutorial").innerHTML;
+
+             Array.from(div.querySelectorAll("[itemscope='itemscope'][itemtype='tutorial-step']"))
+                  .sort((a, b) => parseInt(a.dataset.stepNumber) - parseInt(b.dataset.stepNumber))
+                  .forEach(e => {
+                    var stepNumber = parseInt(e.dataset.stepNumber);
+                    var textElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-text']");
+                    var codeElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-code']");
+                    var leadingWhiteSpace = codeElement.innerText.split('\n').filter(l => l.trim().length != 0)[0].match(/^[ ]*/)[0] || "";
+                    var code = leadingWhiteSpace + codeElement.innerText.trim();
+                    code = code.split('\n').map(l => l.replace(new RegExp('^' + leadingWhiteSpace + ''), '')).join('\n');
+                    tutorial.steps[stepNumber] = { text: textElement, code: code };
+                  });
+
+             tutorial_start();
+           });
          }
         </script>
     </body>

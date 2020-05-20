@@ -1,0 +1,252 @@
+<html>
+    <head>
+        <title>DragonRuby - Warp Drive Tutorial</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Warp Drive Tutorial</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Traveling at Light Speed</h1>
+                In this tutorial, we'll be creating a movement effect that makes it look like you're traveling at light speed.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # entry point to game
+                    def tick args
+                    end
+
+                    # reset the game on save
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Drawing Crosshairs</h1>
+                We are going to set our coordinate system to <code>origin_center</code> which means that <code>0, 0</code> is in the center of the screen.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # set the coordinate system to have the
+                      # origin in the center
+                      args.grid.origin_center!
+
+                      # draw a horizontal and vertical
+                      # line through the origin
+                      # horizontal line
+                      args.outputs.lines << [ args.grid.left, # X
+                                                           0, # Y
+                                             args.grid.right, # X2
+                                                           0] # Y2
+                      # vertical line
+                      args.outputs.lines << [              0, # X
+                                               args.grid.top, # Y
+                                                           0, # X2
+                                            args.grid.bottom] # Y2
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Initializing State</h1>
+                We'll use RNG, and the Game Toolkit's <code>Numeric#vector_(x|y)</code>
+                function to create 100 points around the origin.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # set the coordinate system to have the
+                      # origin in the center
+                      args.grid.origin_center!
+
+                      # set the radius of the warp tunnel
+                      # this area will be void of stars
+                      args.state.warp_tunnel_size = 10;
+
+                      # set stars to 100 stars by first
+                      args.state.stars ||= 100.map do |i|
+                        # generating 100 random angles between
+                        # 0 and 360
+                        rand(360)
+                      end.map do |random_angle|
+                        # create a Hash with initial
+                        # starting locations, color
+                        # and speed (between 3 and 13 pixels)
+                        { initial_x: random_angle.vector_x *
+                                     args.state.warp_tunnel_size,
+                          initial_y: random_angle.vector_y *
+                                     args.state.warp_tunnel_size,
+                              angle: random_angle,
+                                  r:  128,
+                                  g:  rand(128) + 128,
+                                  b:  rand(128) + 128,
+                                  s:  rand(13) + 3 }
+                      end.map do |star|
+                        # using the initial hash
+                        # generate the the starting
+                        # position as a pixel
+                        star.merge x: star[:initial_x],
+                                   y: star[:initial_y],
+                                   w: 1,
+                                   h: 1
+                      end
+
+                      # black background color
+                      args.outputs.background_color = [0, 0, 0]
+
+                      # render the stars as solid pixels
+                      args.outputs.solids << args.state.stars
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Moving Things</h1>
+                Now that we have the stars created. Let's move them.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # refactor the code to seperate
+                    # methods
+                    def tick args
+                      # initialize default values
+                      defaults args
+                      # render the game
+                      render args
+                      # calculate the next step of the game
+                      calc args
+                    end
+
+                    def calc args
+                      # for each star move it along the
+                      # normal vector denoted by its angle
+                      args.state.stars.each do |star|
+                        star[:x] += star[:angle].vector_x * star[:s]
+                        star[:y] += star[:angle].vector_y * star[:s]
+                      end
+                    end
+
+                    def render args
+                      args.outputs.background_color = [0, 0, 0]
+                      args.outputs.solids << args.state.stars
+                    end
+
+                    def defaults args
+                      args.grid.origin_center!
+                      args.state.warp_tunnel_size = 10;
+                      args.state.stars ||= 100.map do |i|
+                        rand(360)
+                      end.map do |random_angle|
+                        { initial_x: random_angle.vector_x *
+                                     args.state.warp_tunnel_size,
+                          initial_y: random_angle.vector_y *
+                                     args.state.warp_tunnel_size,
+                              angle: random_angle,
+                                  r:  128,
+                                  g:  rand(128) + 128,
+                                  b:  rand(128) + 128,
+                                  s:  0.1 + rand * 2 }
+                      end.map do |star|
+                        star.merge x:  star[:initial_x],
+                                   y:  star[:initial_y],
+                                   w:  1,
+                                   h:  1
+                      end
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="5">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Reset Initial Star State</h1>
+                There was a sudden explosion of movement, and then nothing.
+                Once the star is off the screen, we'll want to reset its
+                position back to its starting point.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      defaults args
+                      render args
+                      calc args
+                    end
+
+                    def calc args
+                      args.state.stars.each do |star|
+                        star[:x] += star[:angle].vector_x * star[:s]
+                        star[:y] += star[:angle].vector_y * star[:s]
+                      end
+
+                      args.state.stars.find_all do |star|
+                        # find all stars that no longer
+                        # intersect the game's render area
+                        !star.intersect_rect? args.grid.rect
+                      end.each do |star|
+                        # for those stars, reset them back to their
+                        # original position
+                        star[:x]  = star[:initial_x]
+                        star[:y]  = star[:initial_y]
+                      end
+                    end
+
+                    def render args
+                      args.outputs.background_color = [0, 0, 0]
+                      args.outputs.solids << args.state.stars
+                    end
+
+                    def defaults args
+                      args.grid.origin_center!
+                      args.state.warp_tunnel_size = 10;
+                      args.state.stars ||= 100.map do |i|
+                        rand(360)
+                      end.map do |random_angle|
+                        { initial_x: random_angle.vector_x *
+                                     args.state.warp_tunnel_size,
+                          initial_y: random_angle.vector_y *
+                                     args.state.warp_tunnel_size,
+                              angle: random_angle,
+                                  r: 128,
+                                  g: rand(128) + 128,
+                                  b: rand(128) + 128,
+                                  s: 0.1 + rand * 2 }
+                      end.map do |star|
+                        star.merge x: star[:initial_x],
+                                   y: star[:initial_y],
+                                   w: 1,
+                                   h: 1
+                      end
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        <footer id="bottom"></footer>
+    </body>
+</html>
