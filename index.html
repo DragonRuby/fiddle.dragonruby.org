@@ -191,6 +191,7 @@
            editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + K for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
            editor.gotoLine(0);
            editor.clearSelection();
+           save();
          }
 
          function tutorial_retrieve() {
