@@ -25,7 +25,7 @@
         </div>
 
 
-        <iframe src="game.html"></iframe>
+        <iframe src="game.html" scrolling="no"></iframe>
 
         <script>
          function hotload() {
@@ -46,15 +46,38 @@
            }, 1000);
          });
 
-         document.addEventListener('keydown', function(event) {
-           var S = 83,
-               activeElement = document.activeElement;
+          function suppressShortcutKeys(event) {
+            var S = 83, N = 78, P = 80, K = 75,
+            activeElement = document.activeElement;
 
-           if ((event.key === S || event.keyCode === S) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
-             event.preventDefault();
-             save();
-           }
-         });
+            if ((event.key === S || event.keyCode === S) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
+              event.preventDefault();
+              event.stopPropagation();
+              save();
+            }
+
+            if ((event.key === N || event.keyCode === N) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
+              event.preventDefault();
+              event.stopPropagation();
+              save();
+            }
+
+            if ((event.key === P || event.keyCode === P) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
+              event.preventDefault();
+              event.stopPropagation();
+              save();
+            }
+
+            if ((event.key === K || event.keyCode === K) && (event.metaKey || event.ctrlKey) && activeElement.nodeName === 'TEXTAREA') {
+              event.preventDefault();
+              event.stopKropagation();
+              save();
+            }
+          }
+
+         document.addEventListener('keydown', suppressShortcutKeys);
+         document.addEventListener('keypress', suppressShortcutKeys);
+         document.addEventListener('keyup', suppressShortcutKeys);
         </script>
 
         <script src="lib/ace.js"></script>
@@ -86,6 +109,12 @@
            name: "next",
            exec: function() { tutorial_next(); },
            bindKey: {mac: "ctrl-n", win: "ctrl-n"}
+         });
+
+         editor.commands.addCommand({
+           name: "next 2",
+           exec: function() { tutorial_next(); },
+           bindKey: {mac: "ctrl-k", win: "ctrl-k"}
          });
 
          editor.commands.addCommand({
@@ -159,7 +188,7 @@
          function tutorial_load_step(number) {
            var tutorial_step = tutorial.steps[number.toString()];
            document.getElementById("tutorial").innerHTML = tutorial_step.text.outerHTML;
-           editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + N for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
+           editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + K for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
            editor.gotoLine(0);
            editor.clearSelection();
          }
