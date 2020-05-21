@@ -15,6 +15,7 @@ pre code {
 
 h1 {
     line-height: 1.2em;
+    border-bottom: solid 1px rgb(252, 253, 252);
 }
 
 body {

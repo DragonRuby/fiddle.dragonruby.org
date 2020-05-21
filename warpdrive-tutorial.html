@@ -63,7 +63,7 @@
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Initializing State</h1>
-                We'll use RNG, and the Game Toolkit's <code>Numeric#vector_(x|y)</code>
+                We'll use RNG, and DragonRuby Game Toolkit's <code>Numeric#vector_(x|y)</code>
                 function to create 100 points around the origin.
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
@@ -122,7 +122,8 @@
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Moving Things</h1>
-                Now that we have the stars created. Let's move them.
+                Now that we have the stars created. Let's move them (we take this opportunity to refactor
+                the <code>tick</code> method into multiple parts).
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
@@ -185,7 +186,7 @@
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Reset Initial Star State</h1>
                 There was a sudden explosion of movement, and then nothing.
-                Once the star is off the screen, we'll want to reset its
+                Once a star is off the screen, we'll want to reset its
                 position back to its starting point.
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
