@@ -18,6 +18,10 @@
                     <code class="language-ruby" itemprop="text">
                     # entry point to game
                     def tick args
+                      # set the game's background color
+                      # try changing these numbers and seeing how
+                      # the background color changes
+                      args.outputs.background_color = [40, 44, 52]
                     end
 
                     # reset the game on save
@@ -52,6 +56,8 @@
                                                args.grid.top, # Y
                                                            0, # X2
                                             args.grid.bottom] # Y2
+
+                      args.outputs.background_color = [40, 44, 52]
                     end
 
                     $gtk.reset
@@ -248,17 +254,18 @@
                     </code>
                 </pre>
             </div>
-            <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="6">
-                <div itemscope="itemscope" itemtype="tutorial-text">
-                    <h1>3D Effects</h1>
-                    You can give the movement a bit more depth by accelerating the
-                    star and increasing its size over time. This is the final result.
-                    Play around with the properties and see how altering the numbers gives
-                    you different results.
-                </div>
-                <div itemscope="itemscope" itemtype="tutorial-code">
-                    <pre>
-                        <code class="language-ruby" itemprop="text">
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="6">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>3D Effects</h1>
+                You can give the movement a bit more depth by accelerating the
+                star and increasing its size over time. This is the final result.
+                Play around with the properties and see how altering the numbers gives
+                you different results.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
                     def tick args
                       defaults args
                       render args
@@ -334,10 +341,10 @@
                     end
 
                     $gtk.reset
-                        </code>
-                    </pre>
-                </div>
+                    </code>
+                </pre>
             </div>
+        </div>
         <footer id="bottom"></footer>
     </body>
 </html>

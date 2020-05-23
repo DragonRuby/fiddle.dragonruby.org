@@ -79,6 +79,9 @@ iframe {
     background: rgb(40, 44, 52) !important;
 }
 
+a { color: white; }
+a:visited { color: white; }
+
 #tutorial {
     animation-name: node-ready;
     animation-duration: 0.001s;

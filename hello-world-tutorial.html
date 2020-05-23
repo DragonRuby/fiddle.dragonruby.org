@@ -1,0 +1,137 @@
+<html>
+    <head>
+        <title>DragonRuby - Hello World</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Warp Drive Tutorial</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Hello World</h1>
+                In this tutorial, we'll cover the basics of DragonRuby Game Toolkit. We'll start off with
+                a empty canvas with a dark gray color.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # entry point to game
+                    def tick args
+                      # set the game's background color
+                      # try changing these numbers and seeing how
+                      # the background color changes
+                      args.outputs.background_color = [40, 44, 52]
+                    end
+
+                    # reset the game on save
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Drawing A Sprite</h1>
+                Here is how you add a sprite to the screen.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # add a sprite
+                      # try change these numbers to see
+                      # how the sprite changes
+                      args.outputs.sprites << [
+                         0,                         # X
+                         0,                         # Y
+                        20,                         # W
+                        20,                         # H
+                        'sprites/square-green.png', # PATH
+                      ]
+
+                      # list of sprites you have availble to you:
+                      # colors of the rainbow ROY G BIV.
+                      # - sprites/square-red.png
+                      # - sprites/square-orange.png
+                      # - sprites/square-yellow.png
+                      # - sprites/square-green.png
+                      # - sprites/square-blue.png
+                      # - sprites/square-indigo.png
+                      # - sprites/square-violet.png
+                      # - sprites/square-black.png
+                      # - sprites/square-white.png
+                      # - sprites/circle-red.png
+                      # - sprites/circle-orange.png
+                      # - sprites/circle-yellow.png
+                      # - sprites/circle-green.png
+                      # - sprites/circle-blue.png
+                      # - sprites/circle-indigo.png
+                      # - sprites/circle-violet.png
+                      # - sprites/circle-black.png
+                      # - sprites/circle-white.png
+
+                      args.outputs.background_color = [40, 44, 52]
+                    end
+
+                    # reset the game on save
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Moving The Sprite</h1>
+                The <code>tick</code> method is executed <code>60</code> times a second. To
+                store the location of a sprite accross frames, we need to store it in <code>args.state</code>.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # initialize the x location once
+                      # using Ruby's ||= operator
+                      args.state.x ||= 0
+                      args.state.y ||= 0
+
+                      # every tick, increment the location
+                      # of the sprite by 1
+                      args.state.x += 1
+                      args.state.y += 1
+
+                      # if the sprite is off the screen
+                      # move it back to the original position
+                      # the size of this canvas is
+                      # 160 pixels by 90 pixels
+                      if args.state.x > 160
+                        args.state.x = -10
+                      end
+
+                      if args.state.y > 90
+                        args.state.y = -10
+                      end
+
+                      # render the sprite based on state
+                      args.outputs.sprites << [
+                        args.state.x,               # X
+                        args.state.y,               # Y
+                        20,                         # W
+                        20,                         # H
+                        'sprites/square-green.png', # PATH
+                      ]
+
+                      args.outputs.background_color = [40, 44, 52]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <footer id="bottom"></footer>
+    </body>
+</html>
