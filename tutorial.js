@@ -1,8 +1,4 @@
-var nodeReadyCssHook = "                               \
-";
-
 var styleElement = document.createElement('style');
-document.innerHTML = nodeReadyCssHook;
 document.getElementsByTagName("head")[0].appendChild(styleElement);
 
 document.addEventListener("animationstart", e => {

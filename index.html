@@ -4,7 +4,27 @@
         <meta charset="utf-8">
         <link rel="stylesheet" href="style.css" />
         <title>DragonRuby Game Toolkit Tutorial</title>
-        <script src="//cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.js"></script>
+        <script>
+         function tutorialUrl() {
+           var tutorialUrl = window.location.href.match(/tutorial=(.*)/) || [""];
+           return tutorialUrl[0].replace("tutorial=", "").trim();
+         }
+
+         document.addEventListener("animationstart", e => {
+           debugger;
+           if (e.animationName == "node-ready") {
+             if (e.target.id == "tutorial") {
+               if (tutorialUrl().length > 0) {
+                 e.target.innerHTML = "<div>loading tutorial....</div>";
+               }
+             } else if (e.target.id == "game-frame") {
+               setTimeout(function() {
+                 e.target.style.opacity = "100%";
+               }, 500);
+             }
+          }
+         });
+        </script>
     </head>
     <body id='toplevel'>
         <script>
@@ -15,17 +35,24 @@
          }
         </script>
 
-        <a id="tutorial-prev" href="#" onclick="tutorial_prev()">prev<br/>step</a>
-        <a id="tutorial-next" href="#" onclick="tutorial_next()">next<br/>step</a>
-        <span id="tutorial-link-pointer">Use these links to<br/> navigate the tutorial →</span>
+        <a id="tutorial-menu" href="index.html">menu</a>
+        <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;">prev<br/>step</a>
+        <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;">next<br/>step</a>
+        <span id="tutorial-link-pointer" style="display: none">Use these links to<br/> navigate the tutorial →</span>
 
         <div id="editor"></div>
 
         <div id="tutorial">
+            <div>
+                <h1>Tutorials</h1>
+                <ul>
+                    <li>Hello World</li>
+                    <li><a href="index.html?tutorial=warpdrive-tutorial.html">Traveling at Light Speed</a></li>
+                </ul>
+            </div>
         </div>
 
-
-        <iframe src="game.html" scrolling="no"></iframe>
+        <iframe id="game-frame" src="game.html" scrolling="no"></iframe>
 
         <script>
          function hotload() {
@@ -42,7 +69,8 @@
              editor.focus();
              editor.gotoLine(0);
              editor.clearSelection();
-             tutorial_retrieve();
+             heightUpdateFunction();
+             tutorialRetrieve();
            }, 1000);
          });
 
@@ -87,6 +115,7 @@
         <script src="lib/popper.min.js"></script>
         <script src="lib/bootstrap.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/reqwest/2.0.5/reqwest.js"></script>
         <script>
          var editor = ace.edit("editor");
          editor.setTheme("ace/theme/monokai");
@@ -107,19 +136,19 @@
 
          editor.commands.addCommand({
            name: "next",
-           exec: function() { tutorial_next(); },
+           exec: function() { tutorialLoadNextStep(); },
            bindKey: {mac: "ctrl-n", win: "ctrl-n"}
          });
 
          editor.commands.addCommand({
            name: "next 2",
-           exec: function() { tutorial_next(); },
+           exec: function() { tutorialLoadNextStep(); },
            bindKey: {mac: "ctrl-k", win: "ctrl-k"}
          });
 
          editor.commands.addCommand({
            name: "prev",
-           exec: function() { tutorial_prev(); },
+           exec: function() { tutorialLoadPreviousStep(); },
            bindKey: {mac: "ctrl-p", win: "ctrl-p"}
          });
 
@@ -131,10 +160,8 @@
          });
 
          var heightUpdateFunction = function() {
-
            // http://stackoverflow.com/questions/11584061/
-           var newHeight =
-             editor.getSession().getScreenLength() * editor.renderer.lineHeight + editor.renderer.scrollBar.getWidth();
+           var newHeight = editor.getSession().getScreenLength() * editor.renderer.lineHeight + editor.renderer.scrollBar.getWidth();
 
            $('#editor').height("540px");
            $('#editor-section').height("540px");
@@ -150,42 +177,39 @@
          // Whenever a change happens inside the ACE editor, update
          // the size again
          editor.getSession().on('change', heightUpdateFunction);
-
-         /* var reference_code = ace.edit("reference-code");
-          * reference_code.setTheme("ace/theme/monokai");
-          * reference_code.session.setMode("ace/mode/ruby");
-          * reference_code.setFontSize("14px");
-          * reference_code.setReadOnly('true');
-          */
         </script>
 
         <script>
          var tutorial = { steps: { } };
-         var current_tutorial_step = 1;
+         var tutorialCurrentStep = 1;
 
-         function tutorial_start() {
-           tutorial_load_step(current_tutorial_step);
+         function tutorialStart() {
+           document.getElementById("tutorial-link-pointer").style.display = 'none';
+           document.getElementById("tutorial-next").style.display = 'inline';
+           document.getElementById("tutorial-prev").style.display = 'inline';
+           document.getElementById("tutorial-link-pointer").style.display = 'inline';
+           tutorialLoadStep(tutorialCurrentStep);
          }
 
-         function tutorial_prev() {
+         function tutorialLoadPreviousStep() {
            document.getElementById("tutorial-link-pointer").style.display = 'none';
-           var next_step = current_tutorial_step - 1;
+           var next_step = tutorialCurrentStep - 1;
            if (tutorial.steps[next_step.toString()]) {
-             current_tutorial_step -= 1;
-             tutorial_load_step(current_tutorial_step);
+             tutorialCurrentStep -= 1;
+             tutorialLoadStep(tutorialCurrentStep);
            }
          }
 
-         function tutorial_next() {
+         function tutorialLoadNextStep() {
            document.getElementById("tutorial-link-pointer").style.display = 'none';
-           var next_step = current_tutorial_step + 1;
+           var next_step = tutorialCurrentStep + 1;
            if (tutorial.steps[next_step.toString()]) {
-             current_tutorial_step += 1;
-             tutorial_load_step(current_tutorial_step);
+             tutorialCurrentStep += 1;
+             tutorialLoadStep(tutorialCurrentStep);
            }
          }
 
-         function tutorial_load_step(number) {
+         function tutorialLoadStep(number) {
            var tutorial_step = tutorial.steps[number.toString()];
            document.getElementById("tutorial").innerHTML = tutorial_step.text.outerHTML;
            editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + K for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
@@ -194,8 +218,12 @@
            save();
          }
 
-         function tutorial_retrieve() {
-           reqwest('warpdrive-tutorial.html', function (resp) {
+         function tutorialRetrieve() {
+           if (tutorialUrl().length == 0) { return; }
+
+           document.getElementById("tutorial").innerHTML = "<div>loading tutorial....</div>";
+
+           reqwest(tutorialUrl(), function (resp) {
              var script = document.createElement("script");
              script.id = "retrieved-tutorial";
              script.type = "text/tutorial";
@@ -216,7 +244,7 @@
                     tutorial.steps[stepNumber] = { text: textElement, code: code };
                   });
 
-             tutorial_start();
+             tutorialStart();
            });
          }
         </script>
