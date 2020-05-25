@@ -2,7 +2,7 @@
 <html lang="en-us">
     <head>
         <meta charset="utf-8">
-        <link rel="stylesheet" href="style.css" />
+        <link rel="stylesheet" href="index.css" />
         <title>DragonRuby Game Toolkit Tutorial</title>
         <script>
          function tutorialUrl() {
@@ -11,7 +11,6 @@
          }
 
          document.addEventListener("animationstart", e => {
-           debugger;
            if (e.animationName == "node-ready") {
              if (e.target.id == "tutorial") {
                if (tutorialUrl().length > 0) {
@@ -46,8 +45,8 @@
             <div>
                 <h1>Tutorials</h1>
                 <ul>
-                    <li><a href="index.html?tutorial=hello-world-tutorial.html">Hello World</a></li>
-                    <li><a href="index.html?tutorial=warpdrive-tutorial.html">Traveling at Light Speed</a></li>
+                    <li><a href="index.html?tutorial=tutorial-hello-world.html">Hello World</a></li>
+                    <li><a href="index.html?tutorial=tutorial-traveling-at-light-speed.html">Traveling at Light Speed</a></li>
                 </ul>
             </div>
         </div>
