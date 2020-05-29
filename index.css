@@ -43,7 +43,7 @@ body {
     position: relative;
     background-color: rgb(40, 44, 52);
     font-family: 'firacode';
-    font-size: 12px;
+    font-size: 14px;
     color: #ffffff;
     border: solid 1px black;
 }
@@ -98,12 +98,11 @@ a:visited { color: white; }
     padding: 0;
     margin: 0;
     margin-bottom: 5px;
-    font-size: 25px;
+    font-size: 16px;
     border-bottom: solid 1px silver;
 }
 
 #tutorial div {
-    font-size: 20px;
     padding: 10px;
     z-index: 1;
 }

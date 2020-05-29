@@ -1,0 +1,119 @@
+<html>
+    <head>
+        <title>DragonRuby Game Toolkit - Collisions: Many to One</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Collisions: Many to One</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Collisions: Many to One</h1>
+                <p>The small squares collide with the center square. The more collisions, the more red the center square gets.</p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # SET DEFAULTS ==============================
+                      # Center body's values are set using an array
+                      # All bodies that intersect with center body
+                      # are stored in collisions collection
+                      # calculations done to place body in center
+                      args.state.target ||= {
+                        x: args.grid.w.half - 25,
+                        y: args.grid.h.half - 25,
+                        w: 50,
+                        h: 50,
+                        collisions: []
+                      }
+
+                      # Numeric#map is used to set values of 50
+                      # other bodies
+                      # 50 bodies given random position on screen
+                      args.state.squares ||= 50.map do
+                        [args.grid.w * rand,
+                         args.grid.h * rand,
+                         3,
+                         3]
+                      end
+
+                      # RENDER =============================
+                      # transparency changes based on number
+                      # of collisions the more collisions,
+                      # the redder (more transparent) the
+                      # box becomes
+                      alpha = args.state
+                                  .target[:collisions]
+                                  .length * 5
+
+                      args.solids << (args.state
+                                          .target
+                                          .merge r: 255,
+                                                 g: 0,
+                                                 b: 0,
+                                                 a: alpha)
+
+                      # outputs center body as a black border
+                      args.borders << args.state.target
+
+                      # other bodies are output as (black) solids
+                      args.solids << args.state.squares
+
+                      # MOVE BODIES =============================
+                      # Bodies are returned to bottom left corner
+                      # if positions exceed scope of screen
+                      # for each body in the other_bodies collection
+                      args.state.squares.each do |b|
+                        # x and y are both incremented by 1
+                        b.x += 1
+                        b.y += 1
+
+                        # x becomes 0 if star exceeds scope
+                        # of screen (goes too far right)
+                        # y becomes 0 if star exceeds scope
+                        # of screen (goes too far up)
+                        b.x = 0 if b.x > args.grid.w
+                        b.y = 0 if b.y > args.grid.h
+                      end
+
+                      # PROCESS COLLISIONS =================
+                      # finds all bodies that intersect with
+                      # center body, stores them in collisions
+                      args.state.target[:collisions] =
+                        args.state
+                            .squares
+                            .find_all do |b|
+                              args.state
+                                  .target
+                                  .intersect_rect? b
+                            end
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <footer id="bottom"></footer>
+
+        <script type="text/template-sample">
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="STEP_NUMBER">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>STEP_TITLE</h1>
+                <p>STEP_TEXT</p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # STEP_CODE
+                    </code>
+                </pre>
+            </div>
+        </div>
+        </script>
+    </body>
+</html>
