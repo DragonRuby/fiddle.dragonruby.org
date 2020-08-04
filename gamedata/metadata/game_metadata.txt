@@ -1,6 +1,6 @@
 devid=dragonruby
 devtitle=DragonRuby
-gameid=dragonruby-gtk-sandbox
-gametitle=DragonRuby Game Toolkit Sandbox
+gameid=dragonruby-sandbox
+gametitle=DragonRuby Sandbox
 version=1.0
 icon=metadata/icon.png

@@ -4,5 +4,14 @@ body {
     border: 0;
 }
 canvas {
-    background-color: rgb(40, 44, 52);
+    background-color: rgb(80, 80, 80);
+    border: 0px none;
+}
+
+#borderdiv {
+    width: 1280px;
+    height: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
 }

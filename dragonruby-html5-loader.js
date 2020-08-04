@@ -1,5 +1,5 @@
-var GDragonRubyGameId = 'fantasy-console';
-var GDragonRubyGameTitle = 'Fantasy Console';
+var GDragonRubyGameId = 'dragonruby-sandbox';
+var GDragonRubyGameTitle = 'DragonRuby Sandbox';
 var GDragonRubyDevTitle = 'DragonRuby';
 var GDragonRubyGameVersion = '1.0';
 var GDragonRubyIcon = '/metadata/icon.png';
@@ -359,6 +359,10 @@ document.getElementById('progressdiv').style.display = 'none';
 document.getElementById('output').style.display = 'none';
 document.getElementById('game-input').style.display = "none"
 
+if (!window.parent.window.gtk) {
+  window.parent.window.gtk = {};
+}
+
 window.parent.window.gtk.saveMain = function(text) {
   FS.writeFile('app/main.rb', text);
   window.gtk.play();
@@ -492,7 +496,9 @@ var Module = {
         div.removeEventListener('click', Module.clickToPlayListener);
         document.body.removeChild(div);
     }
-    window.parent.window.gtk.starting();
+    if (window.parent.window.gtk.starting) {
+      window.parent.window.gtk.starting();
+    }
     Module["callMain"]();  // go go go!
   },
   startClickToPlay: function() {
