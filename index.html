@@ -14,7 +14,7 @@
            if (e.animationName == "node-ready") {
              if (e.target.id == "tutorial") {
                if (tutorialUrl().length > 0) {
-                 e.target.innerHTML = "<div>loading tutorial....</div>";
+                 e.target.innerHTML = "<div>loading ...</div>";
                }
              } else if (e.target.id == "game-frame") {
                setTimeout(function() {
@@ -35,10 +35,9 @@
         </script>
 
         <a id="tutorial-menu" href="index.html">menu</a>
+        <a id="tutorial-full" href="#" target="_blank">view full source</a>
         <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;">prev<br/>step</a>
         <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;">next<br/>step</a>
-        <span id="tutorial-link-pointer" style="display: none">Use these links to<br/> navigate the tutorial →</span>
-
         <div id="editor"></div>
 
         <div id="tutorial">
@@ -184,15 +183,12 @@
          var tutorialCurrentStep = 1;
 
          function tutorialStart() {
-           document.getElementById("tutorial-link-pointer").style.display = 'none';
            document.getElementById("tutorial-next").style.display = 'inline';
            document.getElementById("tutorial-prev").style.display = 'inline';
-           document.getElementById("tutorial-link-pointer").style.display = 'inline';
            tutorialLoadStep(tutorialCurrentStep);
          }
 
          function tutorialLoadPreviousStep() {
-           document.getElementById("tutorial-link-pointer").style.display = 'none';
            var next_step = tutorialCurrentStep - 1;
            if (tutorial.steps[next_step.toString()]) {
              tutorialCurrentStep -= 1;
@@ -201,7 +197,6 @@
          }
 
          function tutorialLoadNextStep() {
-           document.getElementById("tutorial-link-pointer").style.display = 'none';
            var next_step = tutorialCurrentStep + 1;
            if (tutorial.steps[next_step.toString()]) {
              tutorialCurrentStep += 1;
@@ -210,9 +205,28 @@
          }
 
          function tutorialLoadStep(number) {
+           if (window.tutorial.totalSteps == 1) {
+             document.getElementById("tutorial-prev").style.display = 'none';
+             document.getElementById("tutorial-next").style.display = 'none';
+           } else if (number == 1) {
+             document.getElementById("tutorial-prev").style.display = 'inline';
+             document.getElementById("tutorial-prev").style.opacity = '0.1';
+             document.getElementById("tutorial-next").style.display = 'inline';
+             document.getElementById("tutorial-next").style.opacity = '1.0';
+           } else if (number == tutorial.totalSteps) {
+             document.getElementById("tutorial-prev").style.display = 'inline';
+             document.getElementById("tutorial-prev").style.opacity = '1.0';
+             document.getElementById("tutorial-next").style.display = 'inline';
+             document.getElementById("tutorial-next").style.opacity = '0.1';
+           } else {
+             document.getElementById("tutorial-prev").style.display = 'inline';
+             document.getElementById("tutorial-prev").style.opacity = '1.0';
+             document.getElementById("tutorial-next").style.display = 'inline';
+             document.getElementById("tutorial-next").style.opacity = '1.0';
+           }
            var tutorial_step = tutorial.steps[number.toString()];
            document.getElementById("tutorial").innerHTML = tutorial_step.text.outerHTML;
-           editor.setValue("# Ctrl|Cmd + S for save.\n# Ctrl|Cmd + K for next step in tutorial.\n# Ctrl|Cmd + P for previous step in tutorial.\n\n" + tutorial_step.code);
+           editor.setValue("# Exec Code: ctrl + s or cmd + s.\n# Next Step: ctrl + k or cmd + k.\n# Prev Step: ctrl + p or cmd + p.\n\n" + tutorial_step.code);
            editor.gotoLine(0);
            editor.clearSelection();
            save();
@@ -227,6 +241,7 @@
              url: tutorialUrl(),
              crossOrigin: true,
              success: function (resp) {
+               document.getElementById("tutorial-full").setAttribute("href", tutorialUrl().replace(/raw$/, ''));
                var script = document.createElement("script");
                script.id = "retrieved-tutorial";
                script.type = "text/tutorial";

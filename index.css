@@ -127,9 +127,9 @@ a:visited { color: white; }
     z-index: 100;
 }
 
-#tutorial-next {
-    left: 903px;
-    top: 230px;
+#tutorial-full {
+    left: 760px;
+    top: 245px;
     color: #FFFFFF;
     z-index: 100;
     position: absolute;
@@ -139,16 +139,40 @@ a:visited { color: white; }
     z-index: 100;
 }
 
-#tutorial-prev {
-    left: 833px;
-    top: 230px;
+#tutorial-next {
+    left: 413px;
+    text-decoration: none;
+    top: 5px;
     color: #FFFFFF;
     z-index: 100;
     position: absolute;
     font-weight: 900;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 0.9em;
     z-index: 100;
+    border: solid 1px #ffffff;
+    background-color: #000000;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#tutorial-prev {
+    left: 345px;
+    text-decoration: none;
+    top: 5px;
+    color: #FFFFFF;
+    z-index: 100;
+    position: absolute;
+    font-weight: 900;
+    font-size: 16px;
+    line-height: 0.9em;
+    z-index: 100;
+    border: solid 1px #ffffff;
+    background-color: #000000;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #tutorial-link-pointer {
