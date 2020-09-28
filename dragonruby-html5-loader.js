@@ -614,6 +614,7 @@ var Module = {
       document.getElementById('game-input').focus();
       document.getElementById('game-input').blur();
       document.getElementById('game-input').style.display = "none"
+      window.scrollTo(0, 0);
       canvas.focus();
     });
 
