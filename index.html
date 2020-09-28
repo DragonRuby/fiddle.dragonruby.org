@@ -237,6 +237,13 @@
            save();
          }
 
+         function containsTutorialHtmlElements(text) {
+           return text.match(/head/) &&
+                  text.match(/body/) &&
+                  text.match(/itemscope/) &&
+                  text.match(/itemtype/);
+         }
+
          function parseTutorialHtmlAndStart(htmlTutorial) {
            window.tutorial = { steps: { }, totalSteps: 0 };
 
@@ -258,6 +265,12 @@
 
            tutorialStart();
          }
+
+         function asHtmlTutorial(resp) {
+           if (containsTutorialHtmlElements(resp)) return resp;
+           return document.getElementById("one-step-tutorial").innerHTML.replace(":code:", resp);
+         }
+
          function tutorialRetrieve() {
            if (tutorialUrl().length == 0) { return; }
 
@@ -271,12 +284,29 @@
                var script = document.createElement("script");
                script.id = "retrieved-tutorial";
                script.type = "text/tutorial";
-               script.innerHTML = resp;
+               script.innerHTML = asHtmlTutorial(resp);
                document.body.appendChild(script);
                parseTutorialHtmlAndStart(script);
              }
            });
          }
+        </script>
+        <script type="text/template" id="one-step-tutorial">
+         <html>
+           <head></head>
+           <body>
+             <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+               <div itemscope="itemscope" itemtype="tutorial-text">
+                 <p></p>
+               </div>
+               <div itemscope="itemscope" itemtype="tutorial-code">
+                 <pre>
+                   <code class="language-ruby" itemprop="text">:code:</code>
+                 </pre>
+               </div>
+             </div>
+           </body>
+         </html>
         </script>
     </body>
 </html>
