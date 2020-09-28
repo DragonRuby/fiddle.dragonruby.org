@@ -237,6 +237,27 @@
            save();
          }
 
+         function parseTutorialHtmlAndStart(htmlTutorial) {
+           window.tutorial = { steps: { }, totalSteps: 0 };
+
+           var div = document.createElement("div");
+           div.innerHTML = htmlTutorial.innerHTML;
+
+           Array.from(div.querySelectorAll("[itemscope='itemscope'][itemtype='tutorial-step']"))
+                .sort((a, b) => parseInt(a.dataset.stepNumber) - parseInt(b.dataset.stepNumber))
+                .forEach(e => {
+                  var stepNumber = parseInt(e.dataset.stepNumber);
+                  var textElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-text']");
+                  var codeElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-code']");
+                  var leadingWhiteSpace = codeElement.innerText.split('\n').filter(l => l.trim().length != 0)[0].match(/^[ ]*/)[0] || "";
+                  var code = leadingWhiteSpace + codeElement.innerText.trim();
+                  code = code.split('\n').map(l => l.replace(new RegExp('^' + leadingWhiteSpace + ''), '')).join('\n');
+                  tutorial.steps[stepNumber] = { text: textElement, code: code };
+                  tutorial.totalSteps += 1;
+                });
+
+           tutorialStart();
+         }
          function tutorialRetrieve() {
            if (tutorialUrl().length == 0) { return; }
 
@@ -252,22 +273,7 @@
                script.type = "text/tutorial";
                script.innerHTML = resp;
                document.body.appendChild(script);
-               var div = document.createElement("div");
-               div.innerHTML = document.getElementById("retrieved-tutorial").innerHTML;
-
-               Array.from(div.querySelectorAll("[itemscope='itemscope'][itemtype='tutorial-step']"))
-                    .sort((a, b) => parseInt(a.dataset.stepNumber) - parseInt(b.dataset.stepNumber))
-                    .forEach(e => {
-                      var stepNumber = parseInt(e.dataset.stepNumber);
-                      var textElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-text']");
-                      var codeElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-code']");
-                      var leadingWhiteSpace = codeElement.innerText.split('\n').filter(l => l.trim().length != 0)[0].match(/^[ ]*/)[0] || "";
-                      var code = leadingWhiteSpace + codeElement.innerText.trim();
-                      code = code.split('\n').map(l => l.replace(new RegExp('^' + leadingWhiteSpace + ''), '')).join('\n');
-                      tutorial.steps[stepNumber] = { text: textElement, code: code };
-                    });
-
-               tutorialStart();
+               parseTutorialHtmlAndStart(script);
              }
            });
          }
