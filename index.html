@@ -6,8 +6,13 @@
         <title>DragonRuby Game Toolkit Tutorial</title>
         <script>
          function tutorialUrl() {
-           var tutorialUrl = window.location.href.match(/tutorial=(.*)/) || [""];
-           return tutorialUrl[0].replace("tutorial=", "").trim();
+           var tutorialUrlMatches = window.location.href.match(/tutorial=(.*)/) || [""];
+           var result = (tutorialUrlMatches[0] || "").replace("tutorial=", "").trim();
+           if (result.match(/gist\.github\.com/) && !result.match(/raw/)) {
+             result = result + "/raw";
+             result = result.replace("gist.github.com", "gist.githubusercontent.com");
+           }
+           return result;
          }
 
          document.addEventListener("animationstart", e => {
