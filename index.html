@@ -6,12 +6,37 @@
         <title>DragonRuby Game Toolkit Tutorial</title>
         <script>
          function tutorialUrl() {
+           // is there a querystring parameter
+           // url looks like http://dragonruby.org/?tutorial=TUTORIAL_URL
            var tutorialUrlMatches = window.location.href.match(/tutorial=(.*)/) || [""];
            var result = (tutorialUrlMatches[0] || "").replace("tutorial=", "").trim();
+
+           // nothing found? how about:
+           // url looks like http://dragonruby.org/index.html#TUTORIAL_URL
+           if (result.length == 0) {
+             tutorialUrlMatches = window.location.href.match(/index\.html#(.*)/) || [""];
+             result = (tutorialUrlMatches[0] || "").replace("index.html#", "").trim();
+           }
+
+           // nothing found? how about:
+           // url looks like http://dragonruby.org#TUTORIAL_URL
+           if (result.length == 0) {
+             tutorialUrlMatches = window.location.href.match(/\.org#(.*)/) || [""];
+             result = (tutorialUrlMatches[0] || "").replace(".org#", "").trim();
+           }
+
+           // nothing found? how about:
+           // url looks like http://dragonruby.org/#TUTORIAL_URL
+           if (result.length == 0) {
+             tutorialUrlMatches = window.location.href.match(/\/#(.*)/) || [""];
+             result = (tutorialUrlMatches[0] || "").replace("/#", "").trim();
+           }
+
            if (result.match(/gist\.github\.com/) && !result.match(/raw/)) {
              result = result + "/raw";
              result = result.replace("gist.github.com", "gist.githubusercontent.com");
            }
+
            return result;
          }
 
