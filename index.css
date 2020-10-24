@@ -64,7 +64,7 @@ iframe {
     z-index: 0;
 }
 
-#editor {
+#editor-container {
     position: absolute;
     left: 0px;
     top: 0px;
@@ -73,6 +73,19 @@ iframe {
     background-color: rgb(40, 44, 52);
     border-right: solid 1px black;
     z-index: 1;
+}
+
+.ace_scrollbar-v { display: none !important; }
+
+#editor {
+    margin: 0 0;
+    margin-top: 35px;
+    width: 480px;
+    height: 500px;
+    background-color: rgb(40, 44, 52);
+    border-right: solid 1px black;
+    z-index: 1;
+    overflow: hidden !important;
 }
 
 .ace_gutter {
@@ -139,9 +152,34 @@ a:visited { color: white; }
     z-index: 100;
 }
 
-#tutorial-next {
-    left: 413px;
+#tutorial-save {
+    width: 90px;
+    height: 18px;
+    left: 360px;
+    display: inline;
+    text-align: center;
     text-decoration: none;
+    top: 5px;
+    color: #FFFFFF;
+    z-index: 100;
+    position: absolute;
+    font-weight: 900;
+    font-size: 16px;
+    line-height: 0.9em;
+    z-index: 100;
+    border: solid 1px #ffffff;
+    background-color: #000000;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+#tutorial-next {
+    width: 90px;
+    height: 18px;
+    left: 240px;
+    text-decoration: none;
+    text-align: center;
     top: 5px;
     color: #FFFFFF;
     z-index: 100;
@@ -158,8 +196,11 @@ a:visited { color: white; }
 }
 
 #tutorial-prev {
-    left: 345px;
+    width: 90px;
+    height: 18px;
+    left: 120px;
     text-decoration: none;
+    text-align: center;
     top: 5px;
     color: #FFFFFF;
     z-index: 100;
@@ -176,7 +217,7 @@ a:visited { color: white; }
 }
 
 #tutorial-link-pointer {
-    left: 610px;
+    left: 345px;
     top: 225px;
     color: #555555;
     z-index: 100;

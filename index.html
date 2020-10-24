@@ -41,9 +41,12 @@
 
         <a id="tutorial-menu" href="index.html">menu</a>
         <a id="tutorial-full" href="#" target="_blank">view full source</a>
-        <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;">prev<br/>step</a>
-        <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;">next<br/>step</a>
-        <div id="editor"></div>
+        <a id="tutorial-save" href="#" onclick="save(); return false;"><div style="margin-top: 3px">run</div></a>
+        <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;"><div style="margin-top: 3px">prev step</div></a>
+        <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;"><div style="margin-top: 3px">next step</div></a>
+        <div id="editor-container">
+          <div id="editor"></div>
+        </div>
 
         <div id="tutorial">
             <div>
@@ -124,8 +127,9 @@
          var editor = ace.edit("editor");
          editor.setTheme("ace/theme/monokai");
          editor.session.setMode("ace/mode/ruby");
+         editor.session.setUseWrapMode(true);
 
-         editor.setFontSize("14px");
+         editor.setFontSize("12px");
          editor.commands.addCommand({
            name: "save",
            exec: save,
@@ -164,11 +168,10 @@
          });
 
          var heightUpdateFunction = function() {
-           // http://stackoverflow.com/questions/11584061/
-           var newHeight = editor.getSession().getScreenLength() * editor.renderer.lineHeight + editor.renderer.scrollBar.getWidth();
-
-           $('#editor').height("540px");
-           $('#editor-section').height("540px");
+           $('#editor').height("500px");
+           $('#editor').width("480px");
+           $('#editor-section').height("500px");
+           $('#editor-section').width("480px");
 
            // This call is required for the editor to fix all of
            // its inner structure for adapting to a change in size
@@ -231,9 +234,10 @@
            }
            var tutorial_step = tutorial.steps[number.toString()];
            document.getElementById("tutorial").innerHTML = tutorial_step.text.outerHTML;
-           editor.setValue("# Exec Code: ctrl + s or cmd + s.\n# Next Step: ctrl + k or cmd + k.\n# Prev Step: ctrl + p or cmd + p.\n\n" + tutorial_step.code);
+           editor.setValue("" + tutorial_step.code);
            editor.gotoLine(0);
            editor.clearSelection();
+           $(".ace_scrollbar").attr("display: none !important");
            save();
          }
 
