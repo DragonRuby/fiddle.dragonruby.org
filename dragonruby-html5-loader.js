@@ -1,7 +1,7 @@
 var GDragonRubyGameId = 'dragonruby-sandbox';
 var GDragonRubyGameTitle = 'DragonRuby Sandbox';
 var GDragonRubyDevTitle = 'DragonRuby';
-var GDragonRubyGameVersion = '1.0';
+var GDragonRubyGameVersion = '2.0';
 var GDragonRubyIcon = '/metadata/icon.png';
 
 function syncDataFiles(dbname, baseurl)
@@ -31,7 +31,7 @@ function syncDataFiles(dbname, baseurl)
         total_to_download: 0,
         total_downloaded: 0,
         total_files: 0,
-        pending_files: 0
+        pending_files: []
     };
 
     var log = function(str) { console.log("CACHEAPPDATA: " + str); }
@@ -104,15 +104,16 @@ function syncDataFiles(dbname, baseurl)
         failed("Couldn't open local database: " + event.target.error.message);
     };
 
+    // !!! FIXME: there _has_ to be a better way to do this, right?
+    var hash_count = function(h) {
+        var k = Object.keys(h);
+        return (k === undefined) ? 0 : k.length;
+    }
+
     var finished_file = function(fname) {
         debug("Finished writing '" + fname + "' to the database!");
-        state.pending_files--;
-        if (state.pending_files < 0) {
-            state.pending_files = 0;
-            debug("Uhoh, pending_files went negative?!");
-        }
-        if (state.pending_files == 0) {
-            succeeded();
+        if ((hash_count(state.xhrs) == 0) && (state.pending_files.length == 0)) {
+            succeeded();  // nothing downloading, nothing new to download, and everything is written to disk. Success!
         }
     };
 
@@ -144,10 +145,63 @@ function syncDataFiles(dbname, baseurl)
         };
     };
 
+    var download_another_file = function() {
+        if (state.pending_files.length == 0) {
+            return false;  // nothing to do.
+        }
+
+        var remotefname = state.pending_files.pop();
+        var remoteitem = state.remote_manifest[remotefname];
+        var xhr = new XMLHttpRequest();
+        state.xhrs[remotefname] = xhr;
+        xhr.previously_loaded = 0;
+        xhr.filename = remotefname;
+        xhr.filesize = remoteitem.filesize;
+        xhr.filetime = remoteitem.filetime;
+        xhr.expected_filesize = remoteitem.filesize;
+        xhr.responseType = "arraybuffer";
+        xhr.addEventListener("error", function(e) { failed("Download error on '" + e.target.filename + "'!"); });
+        xhr.addEventListener("timeout", function(e) { failed("Download timeout on '" + e.target.filename + "'!"); });
+        xhr.addEventListener("abort", function(e) { failed("Download abort on '" + e.target.filename + "'!"); });
+
+        xhr.addEventListener('progress', function(e) {
+            if (state.reported_result) { return; }
+            var xhr = e.target;
+            var additional = e.loaded - xhr.previously_loaded;
+            state.total_downloaded += additional;
+            xhr.previously_loaded = e.loaded;
+            debug("Downloaded " + additional + " more bytes for file '" + xhr.filename + "'");
+            var percent = state.total_to_download ? Math.floor((state.total_downloaded / state.total_to_download) * 100.0) : 0;
+            progress("Downloaded " + percent + "% (" + Math.ceil(state.total_downloaded / 1048576) + "/" + Math.ceil(state.total_to_download / 1048576) + " megabytes)");
+        });
+
+        xhr.addEventListener("load", function(e) {
+            if (state.reported_result) { return; }
+            var xhr = e.target;
+            if (xhr.status != 200) {
+                failed("Server reported failure downloading '" + xhr.filename + "'!");
+            } else {
+                debug("Finished download of '" + xhr.filename + "'!");
+                state.total_downloaded -= xhr.previously_loaded;
+                state.total_downloaded += xhr.expected_filesize;
+                xhr.previously_loaded = xhr.expected_filesize;
+                delete state.xhrs[xhr.filename];
+                var percent = state.total_to_download ? Math.floor((state.total_downloaded / state.total_to_download) * 100.0) : 0;
+                progress("Downloaded " + percent + "% (" + Math.ceil(state.total_downloaded / 1048576) + "/" + Math.ceil(state.total_to_download / 1048576) + " megabytes)");
+                download_another_file();  // kick off another download now that this one is done.
+                store_file(xhr);
+            }
+        });
+
+        debug("Starting download of '" + xhr.filename + "'...");
+        xhr.open("get", baseurl + remotefname + urlrandomizerarg, true);
+        xhr.send();
+        return true;
+    }
+
     var download_new_files = function() {
         if (state.reported_result) { return; }
         progress("Downloading new files...");
-        var downloadme = [];
         for (var i in state.remote_manifest) {
             var remoteitem = state.remote_manifest[i];
             var remotefname = i;
@@ -155,65 +209,25 @@ function syncDataFiles(dbname, baseurl)
                 debug("remote filename '" + remotefname + "' already downloaded.");
             } else {
                 debug("remote filename '" + remotefname + "' needs downloading.");
-                // the browser will let a handful of these go in parallel, and
-                //  then will queue the rest, firing events as appropriate
-                //  when it gets around to them, so just fire them all off
-                //  here.
-
                 // !!! FIXME: use the Fetch API, plus streaming, as an option.
                 // !!! FIXME:  It can use less memory, since it doesn't need
                 // !!! FIXME:  to keep the whole file in memory.
                 state.total_to_download += remoteitem.filesize;
                 state.total_files++;
-                state.pending_files++;
-
-                var xhr = new XMLHttpRequest();
-                state.xhrs[remotefname] = xhr;
-                xhr.previously_loaded = 0;
-                xhr.filename = remotefname;
-                xhr.filesize = state.remote_manifest[i].filesize;
-                xhr.filetime = state.remote_manifest[i].filetime;
-                xhr.expected_filesize = remoteitem.filesize;
-                xhr.responseType = "arraybuffer";
-                xhr.addEventListener("error", function(e) { failed("Download error on '" + e.target.filename + "'!"); });
-                xhr.addEventListener("timeout", function(e) { failed("Download timeout on '" + e.target.filename + "'!"); });
-                xhr.addEventListener("abort", function(e) { failed("Download abort on '" + e.target.filename + "'!"); });
-
-                xhr.addEventListener('progress', function(e) {
-                    if (state.reported_result) { return; }
-                    var xhr = e.target;
-                    var additional = e.loaded - xhr.previously_loaded;
-                    state.total_downloaded += additional;
-                    xhr.previously_loaded = e.loaded;
-                    debug("Downloaded " + additional + " more bytes for file '" + xhr.filename + "'");
-                    var percent = state.total_to_download ? Math.floor((state.total_downloaded / state.total_to_download) * 100.0) : 0;
-                    progress("Downloaded " + percent + "% (" + Math.ceil(state.total_downloaded / 1048576) + "/" + Math.ceil(state.total_to_download / 1048576) + " megabytes)");
-                });
-
-                xhr.addEventListener("load", function(e) {
-                    if (state.reported_result) { return; }
-                    var xhr = e.target;
-                    if (xhr.status != 200) {
-                        failed("Server reported failure downloading '" + xhr.filename + "'!");
-                    } else {
-                        debug("Finished download of '" + xhr.filename + "'!");
-                        state.total_downloaded -= xhr.previously_loaded;
-                        state.total_downloaded += xhr.expected_filesize;
-                        xhr.previously_loaded = xhr.expected_filesize;
-                        delete state.xhrs[xhr.filename];
-                        var percent = state.total_to_download ? Math.floor((state.total_downloaded / state.total_to_download) * 100.0) : 0;
-                        progress("Downloaded " + percent + "% (" + Math.ceil(state.total_downloaded / 1048576) + "/" + Math.ceil(state.total_to_download / 1048576) + " megabytes)");
-                        store_file(xhr);
-                    }
-                });
-
-                xhr.open("get", baseurl + remotefname + urlrandomizerarg, true);
-                xhr.send();
+                state.pending_files.push(remotefname)
             }
         }
 
-        if (state.pending_files == 0) {
+        if (state.pending_files.length == 0) {
             succeeded();  // we're already done.  :)
+            return;
+        }
+
+        var max_concurrent_downloads = 4;
+        while (download_another_file()) {
+            if (hash_count(state.xhrs) >= max_concurrent_downloads) {
+                break;  // we'll start another as each download completes.
+            }
         }
     };
 
