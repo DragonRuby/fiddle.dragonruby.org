@@ -1,0 +1,294 @@
+<html>
+    <head>
+        <title>DragonRuby Game Toolkit - Primitives</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Primitives</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Lines</h1>
+                DragonRuby has several primitive structures used to render.
+                One of these primitives is lines.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # entry point to game
+                    def tick args
+                      # Some simple lines
+                      #                        X   Y  X2  Y2
+                      args.outputs.lines  << [ 0,  0, 50, 50]
+                      args.outputs.lines  << [50, 80, 80, 40]
+
+                      # Colorful blue line
+                      args.outputs.lines  << [
+                        20, # X
+                        40, # Y
+                        70, # X2
+                        90, # Y2
+                        35, # R
+                        72, # G
+                        254 # B
+                      ]
+                      # [x, y, x2, y2, [r, g, b]] also works
+                      # Can be used to alias RGB values
+                      args.outputs.lines << [
+                        30,      # X
+                        70,      # Y
+                        60,      # X2
+                        60,      # Y2
+                        lavender # RGB
+                      ]
+
+                      # The alpha parameter affects transparency
+                      # 255 is the max alpha and is fully opaque
+                      # [x, y, x2, y2, r, g, b, a] or
+                      # [x, y, x2, y2, [r, g, b, a]]
+                      args.outputs.lines << [
+                        20, 20, 140, 20,            # X Y X2 Y2
+                        28, 178, 54,                # R G B
+                        args.state.tick_count % 255 # A
+                      ]
+                    end
+
+                    def lavender
+                      # R    G    B
+                      [171, 127, 251]
+                    end
+
+                    # reset the game on save
+                    $gtk.reset
+                </code>
+              </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Borders</h1>
+                Borders is a primitive that draws the lines to a rectangle.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # A simple border
+                      #                        X   Y   W   H
+                      args.outputs.borders << [20, 20, 70, 50]
+
+                      # A colorful border
+                      args.outputs.borders << [
+                        60,      # X
+                        30,      # Y
+                        70,      # W
+                        50,      # H
+                        lavender # RGB
+                      ]
+
+                      # A colorful fading border
+                      args.outputs.borders << [
+                        50,                  # X
+                        10,                  # Y
+                        50,                  # W
+                        40,                  # H
+                        fading_crimson(args) # RGBA
+                      ]
+                    end
+
+                    def lavender
+                      [171, 127, 251]
+                    end
+
+                    def fading_crimson args
+                      # R   G   B
+                      [175, 40, 91,
+                        # Alpha descending from 255
+                        255 - args.state.tick_count % 255]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Solids</h1>
+                Solids are borders that are filled in.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # A simple solid
+                      #                        X   Y   W   H
+                      args.outputs.solids << [20, 20, 70, 50]
+
+                      # A colorful solid
+                      args.outputs.solids << [
+                        60,      # X
+                        30,      # Y
+                        70,      # W
+                        50,      # H
+                        lavender # RGB
+                      ]
+
+                      # A colorful fading solid
+                      args.outputs.solids << [
+                        50,                  # X
+                        10,                  # Y
+                        50,                  # W
+                        40,                  # H
+                        fading_crimson(args) # RGBA
+                      ]
+                    end
+
+                    def lavender
+                      [171, 127, 251]
+                    end
+
+                    def fading_crimson args
+                      [175, 40, 91,
+                        255 - args.state.tick_count % 255]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Labels</h1>
+                Labels are a primitive that show text.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # A simple label
+                      #                        X   Y   TEXT
+                      args.outputs.labels << [5, 85, 'Simple']
+
+                      # A small label
+                      #                        X   Y   TEXT   SIZE
+                      args.outputs.labels << [5, 65, 'Small', -7]
+
+                      # A big label
+                      #                        X   Y   TEXT  SIZE
+                      args.outputs.labels << [5, 55, 'Big',   7]
+
+                      # A left-aligned label
+                      args.outputs.labels << [
+                        args.grid.left.shift_right(5), # X
+                        args.grid.bottom.shift_up(10), # Y
+                        'Left',                        # TEXT
+                        -6,                            # SIZE
+                        0                              # ALIGN
+                      ]
+
+                      # A center-aligned label
+                      args.outputs.labels << [
+                        args.grid.center.x,            # X
+                        args.grid.bottom.shift_up(10), # Y
+                        'Center',                      # TEXT
+                        -6,                            # SIZE
+                        1                              # ALIGN
+                      ]
+
+                      # A right-aligned label
+                      args.outputs.labels << [
+                        args.grid.right.shift_left(5), # X
+                        args.grid.bottom.shift_up(10), # Y
+                        'Right',                       # TEXT
+                        -6,                            # SIZE
+                        2                              # ALIGN
+                      ]
+
+                      # A colorful label
+                      args.outputs.labels << [
+                        args.grid.center.x.shift_right(10), # X
+                        args.grid.center.y.shift_up(10),    # Y
+                        'Color',                            # TEXT
+                        -3,                                 # SIZE
+                        0,                                  # ALIGN
+                        lavender                            # RGB
+                      ]
+
+                      # A fading label
+                      args.outputs.labels << [
+                        args.grid.center.x.shift_right(10), # X
+                        args.grid.center.y.shift_down(10),  # Y
+                        'Fade',                             # TEXT
+                        -3,                                 # SIZE
+                        0,                                  # ALIGN
+                        fading_crimson(args)                # RGBA
+                      ]
+                    end
+
+                    def lavender
+                      [171, 127, 251]
+                    end
+
+                    def fading_crimson args
+                      [175, 40, 91,
+                        255 - args.state.tick_count % 255]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="5">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Sprites</h1>
+                Sprites are used for images and complex shapes.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # A simple sprite
+                      args.outputs.sprites << [
+                        10,                            # X
+                        25,                            # Y
+                        40,                            # W
+                        40,                            # H
+                        'sprites/isometric-violet.png' # PATH
+                      ]
+
+                      # A rotating sprite
+                      args.outputs.sprites << [
+                        60,                          # X
+                        25,                          # Y
+                        40,                          # W
+                        40,                          # H
+                        'sprites/circle-blue.png',   # PATH
+                        args.state.tick_count        # ANGLE
+                      ]
+
+                      # A fading sprite
+                      args.outputs.sprites << [
+                        110,                                # X
+                        25,                                 # Y
+                        40,                                 # W
+                        40,                                 # H
+                        'sprites/hexagon-orange.png',       # PATH
+                        0,                                  # ANGLE
+                        255 - args.state.tick_count % 255   # ALPHA
+                      ]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <footer id="bottom"></footer>
+    </body>
+</html>
