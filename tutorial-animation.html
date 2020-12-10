@@ -1,0 +1,189 @@
+<html>
+    <head>
+        <title>DragonRuby Game Toolkit - Animation</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Animation</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Separate images, looping</h1>
+                An animation using images explosion-0.png to explosion-6.png.
+                This animation is a continuous loop.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    # entry point to game
+                    def tick args
+                      # The frame at which the animation should begin
+                      starting_tick = 0
+
+                      # The number of sprites in the animation
+                      number_of_sprites = 7
+
+                      # The number of frames for each sprite
+                      # of the animation
+                      number_of_frames_per_sprite = 6
+
+                      # Whether the animation should loop
+                      does_animation_loop = true
+
+                      # A function that calculates the current sprite index
+                      sprite_index = starting_tick.frame_index(
+                                       number_of_sprites,
+                                       number_of_frames_per_sprite,
+                                       does_animation_loop
+                                     )
+                      # Draws the animation
+                      args.outputs.sprites << [
+                        50,                                      # X
+                        20,                                      # Y
+                        50,                                      # W
+                        50,                                      # H
+                        "sprites/explosion-#{sprite_index}.png", # PATH
+                      ]
+                    end
+
+                    # reset the game on save
+                    $gtk.reset
+                </code>
+              </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Non-looping animation</h1>
+                Press space to start the animation!
+                Here is how to make an animation that is triggered.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      # If the spacebar is pressed
+                      if args.inputs.keyboard.key_down.space
+                        # Start the animation from the current frame
+                        # Storing starting_tick in args.state means
+                        # its value will remain after every tick
+                        args.state.starting_tick = args.state.tick_count
+                      end
+
+                      number_of_sprites = 7
+                      number_of_frames_per_sprite = 6
+                      does_animation_loop = false
+
+                      # If the animation is complete
+                      # frame_index will return nil
+                      sprite_index = args.state.starting_tick.frame_index(
+                                       number_of_sprites,
+                                       number_of_frames_per_sprite,
+                                       does_animation_loop
+                                     )
+
+                      # This sets which sprite index should be
+                      # displayed after the animation
+                      sprite_index ||= 0
+                      args.outputs.sprites << [
+                        50,                                      # X
+                        20,                                      # Y
+                        50,                                      # W
+                        50,                                      # H
+                        "sprites/explosion-#{sprite_index}.png", # PATH
+                      ]
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Animating from Sprite Sheets</h1>
+                The explosion is animated from a sprite sheet.
+                The images in the sprite sheet are 32 x 32 px.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      starting_tick = 0
+                      number_of_sprites = 7
+                      number_of_frames_per_sprite = 6
+                      does_animation_loop = true
+                      sprite_index = starting_tick.frame_index(
+                                       number_of_sprites,
+                                       number_of_frames_per_sprite,
+                                       does_animation_loop
+                                     )
+
+                      # The sprite should be represented as a hash
+                      # To access the tile-related parameters
+                      args.outputs.sprites << {
+                        x: 50,
+                        y: 20,
+                        w: 50,
+                        h: 50,
+                        path: 'sprites/explosion-sheet.png',
+                        # The dimensions of the tile to be cut
+                        # from the sprite sheet
+                        tile_x: 0 + (sprite_index * 32),
+                        tile_y: 0,
+                        tile_w: 32,
+                        tile_h: 32,
+                      }
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Non-looping Animation from a Sprite Sheet</h1>
+                A combination of the code from previous steps.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      if args.inputs.keyboard.key_down.space
+                        args.state.starting_tick = args.state.tick_count
+                      end
+
+                      number_of_sprites = 7
+                      number_of_frames_per_sprite = 6
+                      does_animation_loop = false
+                      sprite_index = args.state.starting_tick.frame_index(
+                                       number_of_sprites,
+                                       number_of_frames_per_sprite,
+                                       does_animation_loop
+                                     )
+                      sprite_index ||= 0
+                      args.outputs.sprites << {
+                        x: 50,
+                        y: 20,
+                        w: 50,
+                        h: 50,
+                        path: 'sprites/explosion-sheet.png',
+                        tile_x: 0 + (sprite_index * 32),
+                        tile_y: 0,
+                        tile_w: 32,
+                        tile_h: 32,
+                      }
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <footer id="bottom"></footer>
+    </body>
+</html>
