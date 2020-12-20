@@ -1,0 +1,634 @@
+<html>
+    <head>
+        <title>DragonRuby - Arcade Shooter</title>
+        <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+        <script src="tutorial.js"></script>
+        <link rel="stylesheet" href="tutorial.css" />
+    </head>
+    <body>
+        <h1>DragonRuby Game Toolkit - Arcade Shooter</h1>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Moveable Player</h1>
+                <p>We can start by creating a moveable player</p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                      def tick args
+                        defaults args
+                        render args, args.state.player
+                        calc args, args.state.player
+                        input args, args.state.player
+                      end
+
+                      def defaults args
+                        # Initialize player starting values
+                        args.state.player.x ||= 0
+                        args.state.player.y ||= 0
+                        args.state.player.w ||= 15
+                        args.state.player.h ||= 15
+                        args.state.player.path ||= 'sprites/isometric-violet.png'
+                        args.state.player.speed ||= 1
+                      end
+
+                      def render args, player
+                        # Render the player
+                        args.outputs.sprites << [
+                          player.x,
+                          player.y,
+                          player.w,
+                          player.h,
+                          player.path,
+                        ]
+                      end
+
+                      def calc args, player
+                        # Bound the player to the grid
+                        player.x = player.x.greater(args.grid.left)
+                        player.x = player.x.lesser(args.grid.right - player.w)
+                        player.y = player.y.greater(args.grid.bottom)
+                        player.y = player.y.lesser(args.grid.top - player.h)
+                      end
+
+                      def input args, player
+                        # Move the player based on user input
+                        player.x += player.speed if args.inputs.keyboard.right
+                        player.x -= player.speed if args.inputs.keyboard.left
+                        player.y += player.speed if args.inputs.keyboard.up
+                        player.y -= player.speed if args.inputs.keyboard.down
+                      end
+
+                      $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Player Shooting</h1>
+                Next, we will add player shooting.
+                The label shows the number of bullets that exist.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                      def tick args
+                        defaults args
+                        render args, args.state.player
+                        calc args, args.state.player
+                        input args, args.state.player
+                      end
+
+                      def defaults args
+                        args.state.player.x ||= 0
+                        args.state.player.y ||= 0
+                        args.state.player.w ||= 15
+                        args.state.player.h ||= 15
+                        args.state.player.path ||= 'sprites/isometric-violet.png'
+                        args.state.player.speed ||= 1
+
+                        # Initialize values for the player's bullets
+                        args.state.player.bullets ||= []
+                        args.state.player.bullet_size ||= 3
+                        args.state.player.bullet_speed ||= 1.5
+                        args.state.player.bullet_path ||= 'sprites/circle-violet.png'
+                      end
+
+                      def render args, player
+                        args.outputs.sprites << [
+                          player.x,
+                          player.y,
+                          player.w,
+                          player.h,
+                          player.path,
+                        ]
+
+                        # Render the bullets
+                        args.outputs.sprites << player.bullets
+
+                        # Shows how many bullets are being rendered
+                        args.outputs.labels << [
+                          10, 20, player.bullets.size
+                        ]
+                      end
+
+                      def calc args, player
+                        player.x = player.x.greater(args.grid.left)
+                        player.x = player.x.lesser(args.grid.right - player.w)
+                        player.y = player.y.greater(args.grid.bottom)
+                        player.y = player.y.lesser(args.grid.top - player.h)
+
+                        player.bullets = player.bullets.select do |bullet|
+                          # Remove bullets that go off screen
+                          # If you remove this line of code
+                          # The label will show you how many bullets
+                          # are still being rendered
+                          bullet.intersect_rect? args.grid
+                        end.each do |bullet|
+                          # Move the player's bullets up the screen
+                          bullet.y += player.bullet_speed
+                        end
+                      end
+
+                      def input args, player
+                        player.x += player.speed if args.inputs.keyboard.right
+                        player.x -= player.speed if args.inputs.keyboard.left
+                        player.y += player.speed if args.inputs.keyboard.up
+                        player.y -= player.speed if args.inputs.keyboard.down
+
+                        # If the space bar is pressed and lifted
+                        if args.inputs.keyboard.key_up.space
+                          # Add a bullet sprite to player.bullets
+                          player.bullets << [
+                            # Centers the bullet on the center of the player
+                            player.x + player.w / 2 - player.bullet_size / 2,
+                            player.y + player.h / 2 - player.bullet_size / 2,
+                            player.bullet_size,
+                            player.bullet_size,
+                            player.bullet_path,
+                          ]
+                        end
+                      end
+
+                      $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Enemies</h1>
+                We can add enemies that the player has to defeat.
+                Their movement will not be based off of user input.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                      def tick args
+                        defaults args
+                        render args
+                        calc args
+                      end
+
+                      def defaults args
+                        # Create some default values
+                        args.state.enemy_w ||= 15
+                        args.state.enemy_h ||= 15
+                        args.state.enemies ||= []
+                        args.state.enemy_bullets ||= []
+                        # The tick a new enemy should spawn
+                        args.state.enemy_spawn_tick ||= 0
+                        args.state.enemy_bottom ||= args.grid.center.y
+                        args.state.enemy_bullet_size ||= 5
+                        args.state.enemy_bullet_speed ||= 1
+                        args.state.enemy_bullet_path ||= 'sprites/circle-red.png'
+                      end
+
+                      def render args
+                        # Draw the enemies and enemy bullets
+                        args.outputs.sprites << args.state.enemies
+                        args.outputs.sprites << args.state.enemy_bullets
+                      end
+
+                      def calc args
+                        spawn_enemies args
+                        update_enemies args
+                        # Move each bullet
+                        args.state.enemy_bullets.each do | bullet |
+                          bullet.y -= args.state.enemy_bullet_speed
+                        end
+                      end
+
+                      def spawn_enemies args
+                        # If it is time to spawn an enemy
+                        if args.state.enemy_spawn_tick == args.state.tick_count
+                          # and if there are less than 3 enemies
+                          if args.state.enemies.size < 3
+                            # Add an enemy
+                            args.state.enemies << {
+                              x: args.grid.right.randomize(:ratio),
+                              y: args.grid.top - args.state.enemy_h,
+                              w: args.state.enemy_w,
+                              h: args.state.enemy_h,
+                              path: 'sprites/isometric-red.png',
+                              dx: args.state.enemy_bullet_speed
+                                .randomize(:sign),
+                              dy: -args.state.enemy_bullet_speed,
+                              bullet_spawn_tick: args.state.tick_count + 60,
+                            }
+                          end
+                          # Set the new time an enemy should spawn
+                          args.state.enemy_spawn_tick += (rand(4) + 1) * 60
+                        end
+                      end
+
+                      def update_enemies args
+                        args.state.enemies.each do | enemy |
+                          # Move the enemies
+                          enemy[:x] += enemy[:dx]
+                          enemy[:y] += enemy[:dy]
+
+                          # Bound the enemies to the top half of the screen
+                          # Bounce them off of the edges
+                          if enemy[:x] <= args.grid.left
+                            enemy[:x] = args.grid.left
+                            enemy[:dx] = 1
+                          end
+                          if enemy[:x] >= args.grid.right - enemy[:w]
+                            enemy[:x] = args.grid.right - enemy[:w]
+                            enemy[:dx] = -1
+                          end
+                          if enemy[:y] <= args.state.enemy_bottom
+                            enemy[:y] = args.state.enemy_bottom
+                            enemy[:dy] = 1
+                          end
+                          if enemy[:y] >= args.grid.top - enemy[:h]
+                            enemy[:y] = args.grid.top - enemy[:h]
+                            enemy[:dy] = -1
+                          end
+                          # Spawn bullets
+                          if enemy[:bullet_spawn_tick] == args.state.tick_count
+                            args.state.enemy_bullets << [
+                              # Centers the bullet on the center of the enemy
+                              enemy[:x] + enemy[:w] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              enemy[:y] + enemy[:h] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_path,
+                            ]
+                            enemy[:bullet_spawn_tick] += 60
+                          end
+                        end
+                      end
+
+                      $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Bringing it all together</h1>
+                We bring the player and enemies together.
+                The code is also refactored to improve readability.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                      def tick args
+                        defaults args
+                        render args, args.state.player
+                        calc args, args.state.player
+                        input args, args.state.player
+                      end
+
+                      def defaults args
+                        args.state.player.x ||= 0
+                        args.state.player.y ||= 0
+                        args.state.player.w ||= 15
+                        args.state.player.h ||= 15
+                        args.state.player.path ||= 'sprites/isometric-violet.png'
+                        args.state.player.speed ||= 1
+                        args.state.player.bullets ||= []
+                        args.state.player.bullet_size ||= 3
+                        args.state.player.bullet_speed ||= 1.5
+                        args.state.player.bullet_path ||= 'sprites/circle-violet.png'
+
+                        args.state.enemy_w ||= 15
+                        args.state.enemy_h ||= 15
+                        args.state.enemies ||= []
+                        args.state.enemy_bullets ||= []
+                        args.state.enemy_spawn_tick ||= 0
+                        args.state.enemy_bottom ||= args.grid.center.y
+                        args.state.enemy_bullet_size ||= 5
+                        args.state.enemy_bullet_speed ||= 1
+                        args.state.enemy_bullet_path ||= 'sprites/circle-red.png'
+                      end
+
+                      def render args, player
+                        args.outputs.sprites << [
+                          player.x,
+                          player.y,
+                          player.w,
+                          player.h,
+                          player.path,
+                        ]
+                        args.outputs.sprites << player.bullets
+                        args.outputs.sprites << args.state.enemies
+                        args.outputs.sprites << args.state.enemy_bullets
+                      end
+
+                      def calc args, player
+                        bound_player args, player
+                        update_player_bullets args, player
+                        spawn_enemies args
+                        update_enemies args
+
+                        args.state.enemy_bullets.each do | bullet |
+                          bullet.y -= args.state.enemy_bullet_speed
+                        end
+                      end
+
+                      def bound_player args, player
+                        player.x = player.x.greater(args.grid.left)
+                        player.x = player.x.lesser(args.grid.right - player.w)
+                        player.y = player.y.greater(args.grid.bottom)
+                        player.y = player.y.lesser(args.grid.top - player.h)
+                      end
+
+                      def update_player_bullets args, player
+                        player.bullets = player.bullets.select do |bullet|
+                          bullet.intersect_rect? args.grid
+                        end.each do |bullet|
+                          bullet.y += player.bullet_speed
+                        end
+                      end
+
+                      def spawn_enemies args
+                        if args.state.enemy_spawn_tick == args.state.tick_count
+                          if args.state.enemies.size < 3
+                            args.state.enemies << {
+                              x: args.grid.right.randomize(:ratio),
+                              y: args.grid.top - args.state.enemy_h,
+                              w: args.state.enemy_w,
+                              h: args.state.enemy_h,
+                              path: 'sprites/isometric-red.png',
+                              dx: args.state.enemy_bullet_speed
+                                .randomize(:sign),
+                              dy: -args.state.enemy_bullet_speed,
+                              bullet_spawn_tick: args.state.tick_count + 60,
+                            }
+                          end
+                          # Set the new time an enemy should spawn
+                          args.state.enemy_spawn_tick += (rand(4) + 1) * 60
+                        end
+                      end
+
+                      def update_enemies args
+                        args.state.enemies.each do | enemy |
+                          enemy[:x] += enemy[:dx]
+                          enemy[:y] += enemy[:dy]
+
+                          if enemy[:x] <= args.grid.left
+                            enemy[:x] = args.grid.left
+                            enemy[:dx] = 1
+                          end
+                          if enemy[:x] >= args.grid.right - enemy[:w]
+                            enemy[:x] = args.grid.right - enemy[:w]
+                            enemy[:dx] = -1
+                          end
+                          if enemy[:y] <= args.state.enemy_bottom
+                            enemy[:y] = args.state.enemy_bottom
+                            enemy[:dy] = 1
+                          end
+                          if enemy[:y] >= args.grid.top - enemy[:h]
+                            enemy[:y] = args.grid.top - enemy[:h]
+                            enemy[:dy] = -1
+                          end
+
+                          if enemy[:bullet_spawn_tick] == args.state.tick_count
+                            args.state.enemy_bullets << [
+                              # Centers the bullet on the center of the enemy
+                              enemy[:x] + enemy[:w] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              enemy[:y] + enemy[:h] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_path,
+                            ]
+                            enemy[:bullet_spawn_tick] += 60
+                          end
+                        end
+                      end
+
+                      def input args, player
+                        player.x += player.speed if args.inputs.keyboard.right
+                        player.x -= player.speed if args.inputs.keyboard.left
+                        player.y += player.speed if args.inputs.keyboard.up
+                        player.y -= player.speed if args.inputs.keyboard.down
+
+                        if args.inputs.keyboard.key_up.space
+                          player.bullets << [
+                            player.x + player.w / 2 - player.bullet_size / 2,
+                            player.y + player.h / 2 - player.bullet_size / 2,
+                            player.bullet_size,
+                            player.bullet_size,
+                            player.bullet_path,
+                          ]
+                        end
+                      end
+
+                      $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="5">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Adding collisions</h1>
+                Calculating for collisions can make the players and enemies interact.
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                      def tick args
+                        defaults args
+                        render args, args.state.player
+                        input args, args.state.player
+                        calc args, args.state.player
+                      end
+
+                      def defaults args
+                        args.state.player.x ||= 0
+                        args.state.player.y ||= 0
+                        args.state.player.w ||= 15
+                        args.state.player.h ||= 15
+                        # Default value for a player rect
+                        # Used for easy collision handling
+                        args.state.player.rect ||= [
+                          args.state.player.x,
+                          args.state.player.y,
+                          args.state.player.w,
+                          args.state.player.h,
+                        ]
+                        args.state.player.path ||= 'sprites/isometric-violet.png'
+                        args.state.player.speed ||= 1
+                        args.state.player.bullets ||= []
+                        args.state.player.bullet_size ||= 3
+                        args.state.player.bullet_speed ||= 1.5
+                        args.state.player.bullet_path ||= 'sprites/circle-violet.png'
+
+                        args.state.enemy_w ||= 15
+                        args.state.enemy_h ||= 15
+                        args.state.enemies ||= []
+                        args.state.enemy_bullets ||= []
+                        args.state.enemy_spawn_tick ||= 0
+                        args.state.enemy_bottom ||= args.grid.center.y
+                        args.state.enemy_bullet_size ||= 5
+                        args.state.enemy_bullet_speed ||= 1
+                        args.state.enemy_bullet_path ||= 'sprites/circle-red.png'
+                      end
+
+                      def render args, player
+                        args.outputs.sprites << [
+                          player.x,
+                          player.y,
+                          player.w,
+                          player.h,
+                          player.path,
+                        ]
+                        args.outputs.sprites << player.bullets
+                        args.outputs.sprites << args.state.enemies
+                        args.outputs.sprites << args.state.enemy_bullets
+                      end
+
+                      def calc args, player
+                        bound_player args, player
+                        update_player_bullets args, player
+                        spawn_enemies args
+                        update_enemies args
+
+                        # updating player.rect whenever the xywh values change
+                        player.rect = [
+                          player.x,
+                          player.y,
+                          player.w,
+                          player.h,
+                        ]
+
+                        args.state.enemy_bullets.each do | bullet |
+                          bullet.y -= args.state.enemy_bullet_speed
+                          # Reset the game
+                          # if an enemy bullet hits the player
+                          reset_game(args) if bullet.intersect_rect? player.rect
+                        end
+                      end
+
+                      def bound_player args, player
+                        player.x = player.x.greater(args.grid.left)
+                        player.x = player.x.lesser(args.grid.right - player.w)
+                        player.y = player.y.greater(args.grid.bottom)
+                        player.y = player.y.lesser(args.grid.top - player.h)
+                      end
+
+                      def update_player_bullets args, player
+                        player.bullets = player.bullets.select do |bullet|
+                          bullet.intersect_rect? args.grid
+                        end.each do |bullet|
+                          bullet.y += player.bullet_speed
+                          # Remove all enemies
+                          args.state.enemies.reject! do |enemy|
+                           # That a bullet is touching
+                           bullet.intersect_rect? enemy[:rect]
+                          end
+                        end
+                      end
+
+                      def spawn_enemies args
+                        if args.state.enemy_spawn_tick == args.state.tick_count
+                          if args.state.enemies.size < 3
+                            args.state.enemies << {
+                              x: args.grid.right.randomize(:ratio),
+                              y: args.grid.top - args.state.enemy_h,
+                              w: args.state.enemy_w,
+                              h: args.state.enemy_h,
+                              path: 'sprites/isometric-red.png',
+                              dx: args.state.enemy_bullet_speed
+                                .randomize(:sign),
+                              dy: -args.state.enemy_bullet_speed,
+                              bullet_spawn_tick: args.state.tick_count + 60,
+                            }
+                          end
+                          # Set the new time an enemy should spawn
+                          args.state.enemy_spawn_tick += (rand(4) + 1) * 60
+                        end
+                      end
+
+                      def update_enemies args
+                        args.state.enemies.each do | enemy |
+                          enemy[:x] += enemy[:dx]
+                          enemy[:y] += enemy[:dy]
+
+                          if enemy[:x] <= args.grid.left
+                            enemy[:x] = args.grid.left
+                            enemy[:dx] = 1
+                          end
+                          if enemy[:x] >= args.grid.right - enemy[:w]
+                            enemy[:x] = args.grid.right - enemy[:w]
+                            enemy[:dx] = -1
+                          end
+                          if enemy[:y] <= args.state.enemy_bottom
+                            enemy[:y] = args.state.enemy_bottom
+                            enemy[:dy] = 1
+                          end
+                          if enemy[:y] >= args.grid.top - enemy[:h]
+                            enemy[:y] = args.grid.top - enemy[:h]
+                            enemy[:dy] = -1
+                          end
+
+                          if enemy[:bullet_spawn_tick] == args.state.tick_count
+                            args.state.enemy_bullets << [
+                              # Centers the bullet on the center of the enemy
+                              enemy[:x] + enemy[:w] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              enemy[:y] + enemy[:h] / 2 -
+                                args.state.enemy_bullet_size / 2,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_size,
+                              args.state.enemy_bullet_path,
+                            ]
+                            enemy[:bullet_spawn_tick] += 60
+                          end
+
+                          # Creates the enemy rect for collision handling
+                          enemy[:rect] = [
+                            enemy[:x],
+                            enemy[:y],
+                            enemy[:w],
+                            enemy[:h],
+                          ]
+                        end
+                      end
+
+                      def input args, player
+                        player.x += player.speed if args.inputs.keyboard.right
+                        player.x -= player.speed if args.inputs.keyboard.left
+                        player.y += player.speed if args.inputs.keyboard.up
+                        player.y -= player.speed if args.inputs.keyboard.down
+
+                        if args.inputs.keyboard.key_up.space
+                          player.bullets << [
+                            player.x + player.w / 2 - player.bullet_size / 2,
+                            player.y + player.h / 2 - player.bullet_size / 2,
+                            player.bullet_size,
+                            player.bullet_size,
+                            player.bullet_path,
+                          ]
+                        end
+                      end
+
+                      # Resets the game
+                      def reset_game args
+                        args.state.player.x = 0
+                        args.state.player.y = 0
+                        args.state.player.bullets.clear
+                        args.state.enemies.clear
+                        args.state.enemy_bullets.clear
+                      end
+
+                      $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <footer id="bottom"></footer>
+    </body>
+</html>
