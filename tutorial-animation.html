@@ -72,6 +72,11 @@
                         args.state.starting_tick = args.state.tick_count
                       end
 
+                      args.outputs.labels << [80, 1.from_top,
+                                              "press space to animate",
+                                              -7.5,
+                                              1]
+
                       number_of_sprites = 7
                       number_of_frames_per_sprite = 6
                       does_animation_loop = false
@@ -137,6 +142,18 @@
                         tile_w: 32,
                         tile_h: 32,
                       }
+
+                      args.outputs.labels << [80, 22,
+                                              "(contents of png)",
+                                              -7.5, 1]
+
+                      args.outputs.sprites << {
+                        x: 24,
+                        y: 0,
+                        h: 16,
+                        w: 112,
+                        path: 'sprites/explosion-sheet.png'
+                      }
                     end
 
                     $gtk.reset
@@ -177,6 +194,11 @@
                         tile_w: 32,
                         tile_h: 32,
                       }
+
+                      args.outputs.labels << [80, 1.from_top,
+                                              "press space to animate",
+                                              -7.5,
+                                              1]
                     end
 
                     $gtk.reset

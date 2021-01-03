@@ -11,7 +11,7 @@
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Moveable Player</h1>
-                <p>We can start by creating a moveable player</p>
+                <p>We can start by creating a moveable player. Use the arrow keys to move around.</p>
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
@@ -69,8 +69,7 @@
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Player Shooting</h1>
-                Next, we will add player shooting.
-                The label shows the number of bullets that exist.
+                Next, we will add player shooting. Press space to shoot. The label shows the number of bullets that exist.
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
@@ -111,7 +110,7 @@
 
                         # Shows how many bullets are being rendered
                         args.outputs.labels << [
-                          10, 20, player.bullets.size
+                          5, 5.from_top, "bullet count: #{player.bullets.size}", -7.5
                         ]
                       end
 
@@ -140,7 +139,7 @@
                         player.y -= player.speed if args.inputs.keyboard.down
 
                         # If the space bar is pressed and lifted
-                        if args.inputs.keyboard.key_up.space
+                        if args.inputs.keyboard.key_down.space
                           # Add a bullet sprite to player.bullets
                           player.bullets << [
                             # Centers the bullet on the center of the player
@@ -414,7 +413,7 @@
                         player.y += player.speed if args.inputs.keyboard.up
                         player.y -= player.speed if args.inputs.keyboard.down
 
-                        if args.inputs.keyboard.key_up.space
+                        if args.inputs.keyboard.key_down.space
                           player.bullets << [
                             player.x + player.w / 2 - player.bullet_size / 2,
                             player.y + player.h / 2 - player.bullet_size / 2,
@@ -603,7 +602,7 @@
                         player.y += player.speed if args.inputs.keyboard.up
                         player.y -= player.speed if args.inputs.keyboard.down
 
-                        if args.inputs.keyboard.key_up.space
+                        if args.inputs.keyboard.key_down.space
                           player.bullets << [
                             player.x + player.w / 2 - player.bullet_size / 2,
                             player.y + player.h / 2 - player.bullet_size / 2,
