@@ -1,7 +1,7 @@
 var GDragonRubyGameId = 'dragonruby-sandbox';
 var GDragonRubyGameTitle = 'DragonRuby Sandbox';
 var GDragonRubyDevTitle = 'DragonRuby';
-var GDragonRubyGameVersion = '2.0';
+var GDragonRubyGameVersion = '3.0';
 var GDragonRubyIcon = '/metadata/icon.png';
 
 function syncDataFiles(dbname, baseurl)
@@ -360,27 +360,56 @@ function syncDataFiles(dbname, baseurl)
     return retval;
 }
 
+var prepareFilesystem = function()
+{
+  // Download the game data and set up the filesystem!
+  // set up a persistent store for save games, etc.
+  FS.mkdir('/persistent');
+  FS.mount(IDBFS, {}, '/persistent');
+  FS.syncfs(true, function(err) {
+    if (err) {
+      console.log("WARNING: Failed to populate persistent store. Save games likely lost?");
+    } else {
+      console.log("Read in from persistent store.");
+    }
+
+    loadDataFiles(GDragonRubyGameId, 'gamedata/', function() {
+      console.log("Game data is sync'd to MEMFS. Starting click-to-play()...");
+      //Module.setStatus("Ready!");
+      //setTimeout(function() { Module.setStatus(""); statusElement.style.display='none'; }, 1000);
+      Module.setStatus("");
+      statusElement.style.display='none';
+      Module.startClickToPlay();
+    });
+  });
+}
+
+
 var statusElement = document.getElementById('status');
 var progressElement = document.getElementById('progress');
 var canvasElement = document.getElementById('canvas');
 
-canvasElement.style.width =  '480px';
-canvasElement.style.height = '270px';
+canvasElement.style.width = '100%';
+canvasElement.style.height = '100%';
+document.getElementById('borderdiv').style.border = '0px';
 
-statusElement.style.display = 'none';
-progressElement.style.display = 'none';
-document.getElementById('progressdiv').style.display = 'none';
+//statusElement.style.display = 'none';
+//progressElement.style.display = 'none';
+//document.getElementById('progressdiv').style.display = 'none';
 document.getElementById('output').style.display = 'none';
-document.getElementById('game-input').style.display = "none"
 
-if (!window.parent.window.gtk) {
-  window.parent.window.gtk = {};
-}
+// if (!window.parent.window.gtk) {
+//   window.parent.window.gtk = {};
+// }
 
 window.parent.window.gtk.saveMain = function(text) {
   FS.writeFile('app/main.rb', text);
   window.gtk.play();
 }
+// window.parent.window.gtk.saveMain = function(text) {
+//   FS.writeFile('app/main.rb', text);
+//   window.gtk.play();
+// }
 
 
 var loadDataFiles = function(dbname, baseurl, onsuccess) {
@@ -498,8 +527,14 @@ var base64Encode = function(ui8array) {
     return out;
 }
 
+function startGame()
+{
+    Module["removeRunDependency"]("dragonruby_init");
+}
+
+
 var Module = {
-  noInitialRun: true,
+  noInitialRun: false,
   preInit: [],
   clickedToPlay: false,
   clickToPlayListener: function() {
@@ -510,32 +545,50 @@ var Module = {
         div.removeEventListener('click', Module.clickToPlayListener);
         document.body.removeChild(div);
     }
-    if (window.parent.window.gtk.starting) {
-      window.parent.window.gtk.starting();
-    }
-    Module["callMain"]();  // go go go!
+    // if (window.parent.window.gtk.starting) {
+    //   window.parent.window.gtk.starting();
+    // }
+
+    startGame();  // go go go!
   },
   startClickToPlay: function() {
     var base64 = base64Encode(FS.readFile(GDragonRubyIcon, {}));
     var div = document.createElement('div');
+    var leftPx = ((window.innerWidth - 640) / 2);
+    var leftPerc = Math.floor((leftPx / window.innerWidth) * 100);
     div.id = 'clicktoplaydiv';
+    div.style.width = '360px';
+    div.style.height = '360px';
     div.style.backgroundColor = 'rgb(40, 44, 52)';
-
+    div.style.position = 'absolute';
+    div.style.top = '50%';
+    div.style.left = '50%';
+    div.style.transform = 'translate(-50%, -50%)';
 
     var img = new Image();
     img.onload = function() {  // once we know its size, scale it, keeping aspect ratio.
-      img.style.width = '128px';
-      img.style.height = '101px';
+      var pct = 30;
+      var w = img.naturalWidth;
+      var h = img.naturalHeight;
+      if (!w || !h || (w == h)) {
+        img.style.width = '' + pct + '%';
+        img.style.height = '' + pct + '%';
+      } else if (w > h) {
+        img.style.width = '' + pct + '%';
+      } else {
+        img.style.height = '' + pct + '%';
+      }
       img.style.display = 'block';
     }
 
     img.style.display = 'none';
-    img.style.width = '128px';
-    img.style.height = '101px';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
     img.style.margin = 0;
     img.style.position = 'absolute';
-    img.style.top = '10px';
-    img.style.left = '176px';
+    img.style.top = '25%';
+    img.style.left = '50%';
+    img.style.transform = 'translate(-50%, -50%)';
     img.src = 'data:image/png;base64,' + base64;
     div.appendChild(img);
 
@@ -553,14 +606,15 @@ var Module = {
     div.appendChild(p);
 
     p = document.createElement('p');
-    p.innerHTML = 'Click here to begin, or press Ctrl+S<br/>in the code editor to the left.';
+    p.innerHTML = 'Click the run button, or press Ctrl+S<br/>in the code editor to the left.';
     p.style['font-family'] = "monospace";
+    p.style['font-size'] = "14px";
     p.style.textAlign = 'center';
     p.style.backgroundColor = 'rgb(40, 44, 52)';
     p.style.color = '#FFFFFF';
     p.style.width = '100%';
     p.style.position = 'absolute';
-    p.style.top = '70%';
+    p.style.top = '60%';
     div.appendChild(p);
 
     document.body.appendChild(div);
@@ -568,25 +622,10 @@ var Module = {
     window.gtk.play = Module.clickToPlayListener;
   },
   preRun: function() {
-    // set up a persistent store for save games, etc.
-    FS.mkdir('/persistent');
-    FS.mount(IDBFS, {}, '/persistent');
-    FS.syncfs(true, function(err) {
-      if (err) {
-        console.log("WARNING: Failed to populate persistent store. Save games likely lost?");
-      } else {
-        console.log("Read in from persistent store.");
-      }
-
-      loadDataFiles(GDragonRubyGameId, 'gamedata/', function() {
-        console.log("Game data is sync'd to MEMFS. Starting click-to-play()...");
-        //Module.setStatus("Ready!");
-        //setTimeout(function() { Module.setStatus(""); statusElement.style.display='none'; }, 1000);
-        Module.setStatus("");
-        statusElement.style.display='none';
-        Module.startClickToPlay();
-      });
-    });
+    // this prevents the game from running. We'll remove the dependency when
+    //  we have downloaded everything and the user has clicked-through to play.
+    Module["addRunDependency"]("dragonruby_init");
+    prepareFilesystem();   // will get data, async.
   },
   postRun: [],
   print: (function() {
@@ -624,11 +663,6 @@ var Module = {
     canvas.addEventListener("click", function() {
       document.getElementById('toplevel').click();
       document.getElementById('toplevel').focus();
-      document.getElementById('game-input').style.display = "inline"
-      document.getElementById('game-input').focus();
-      document.getElementById('game-input').blur();
-      document.getElementById('game-input').style.display = "none"
-      window.scrollTo(0, 0);
       canvas.focus();
     });
 
@@ -668,36 +702,26 @@ window.onerror = function(event) {
   };
 };
 
+// sanity check this before downloading anything heavy.
 var hasWebAssembly = false;
 if (typeof WebAssembly==="object" && typeof WebAssembly.Memory==="function") {
   hasWebAssembly = true;
 }
 //console.log("Do we have WebAssembly? " + ((hasWebAssembly) ? "YES" : "NO"));
-
-var buildtype = hasWebAssembly ? "wasm" : "asmjs";
-var module = "dragonruby-" + buildtype + ".js";
-window.gtk = {};
-window.gtk.module = Module;
-
-//console.log("Our main module is: " + module);
-
-var script = document.createElement('script');
-script.src = module;
-if (hasWebAssembly) {
-  script.async = true;
+if (!hasWebAssembly) {
+  Module.setStatus("Your browser doesn't have WebAssembly support. Please upgrade.");
 } else {
-  script.async = false;  // !!! FIXME: can this be async?
-  (function() {
-    var memoryInitializer = module + '.mem';
-    if (typeof Module['locateFile'] === 'function') {
-      memoryInitializer = Module['locateFile'](memoryInitializer);
-    } else if (Module['memoryInitializerPrefixURL']) {
-      memoryInitializer = Module['memoryInitializerPrefixURL'] + memoryInitializer;
-    }
-    var meminitXHR = Module['memoryInitializerRequest'] = new XMLHttpRequest();
-    meminitXHR.open('GET', memoryInitializer, true);
-    meminitXHR.responseType = 'arraybuffer';
-    meminitXHR.send(null);
-  })();
+  var buildtype = "wasm";
+  var module = "dragonruby-" + buildtype + ".js";
+  window.gtk = {};
+  window.gtk.module = Module;
+
+  //console.log("Our main module is: " + module);
+
+  var script = document.createElement('script');
+  script.src = module;
+  script.async = true;
+  document.body.appendChild(script);
 }
-document.body.appendChild(script);
+
+// end of dragonruby-html5-loader.js ...
