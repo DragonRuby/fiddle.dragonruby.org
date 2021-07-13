@@ -55,7 +55,7 @@ iframe {
     position: absolute;
     width: 480px;
     height: 270px;
-    left: 480px;
+    left: 0px;
     top: 270px;
     overflow: hidden;
     border: none;
@@ -66,12 +66,13 @@ iframe {
 
 #editor-container {
     position: absolute;
-    left: 0px;
+    left: 480px;
     top: 0px;
     width: 480px;
     height: 540px;
     background-color: rgb(40, 44, 52);
     border-right: solid 1px black;
+    border-left: solid 1px black;
     z-index: 1;
 }
 
@@ -98,7 +99,7 @@ a:visited { color: white; }
 #tutorial {
     animation-name: node-ready;
     animation-duration: 0.001s;
-    left: 480px;
+    left: 0px;
     width: 480px;
     font-size: 14px;
     position: absolute;
@@ -140,7 +141,7 @@ a:visited { color: white; }
 #tutorial-menu {
     width: 90px;
     height: 18px;
-    left: 718px;
+    left: 238px;
     display: inline;
     text-align: center;
     text-decoration: none;
@@ -162,7 +163,7 @@ a:visited { color: white; }
 #tutorial-full {
     width: 90px;
     height: 18px;
-    left: 838px;
+    left: 358px;
     display: inline;
     text-align: center;
     text-decoration: none;
@@ -184,7 +185,7 @@ a:visited { color: white; }
 #tutorial-save {
     width: 90px;
     height: 18px;
-    left: 30px;
+    left: 510px;
     display: inline;
     text-align: center;
     text-decoration: none;
@@ -206,7 +207,7 @@ a:visited { color: white; }
 #tutorial-next {
     width: 90px;
     height: 18px;
-    left: 270px;
+    left: 750px;
     text-decoration: none;
     text-align: center;
     top: 5px;
@@ -227,7 +228,7 @@ a:visited { color: white; }
 #tutorial-prev {
     width: 90px;
     height: 18px;
-    left: 150px;
+    left: 630px;
     text-decoration: none;
     text-align: center;
     top: 5px;
