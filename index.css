@@ -107,6 +107,15 @@ a:visited { color: white; }
     z-index: 1;
 }
 
+
+#tutorial p {
+    margin: 0 0;
+    padding: 0 0;
+    margin-bottom: 8px;
+    line-height: 1.4em;
+    font-weight: 300;
+}
+
 #tutorial h1 {
     padding: 0;
     margin: 0;
@@ -243,4 +252,8 @@ a:visited { color: white; }
     z-index: 100;
     position: absolute;
     font-size: 15px;
+}
+
+.ace_comment {
+    color :rgb(180, 255, 200) !important;
 }
