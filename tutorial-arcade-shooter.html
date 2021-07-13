@@ -94,6 +94,8 @@
                         args.state.player.bullet_size ||= 3
                         args.state.player.bullet_speed ||= 1.5
                         args.state.player.bullet_path ||= 'sprites/circle-violet.png'
+
+                        args.state.enemies ||= []
                       end
 
                       def render args, player
@@ -120,15 +122,17 @@
                         player.y = player.y.greater(args.grid.bottom)
                         player.y = player.y.lesser(args.grid.top - player.h)
 
-                        player.bullets = player.bullets.select do |bullet|
-                          # Remove bullets that go off screen
-                          # If you remove this line of code
-                          # The label will show you how many bullets
-                          # are still being rendered
-                          bullet.intersect_rect? args.grid
-                        end.each do |bullet|
-                          # Move the player's bullets up the screen
+                        player.bullets = player.bullets.find_all do |bullet|
+                          bullet.intersect_rect? args.grid.rect
+                        end
+
+                        player.bullets.each do |bullet|
                           bullet.y += player.bullet_speed
+                          # Remove all enemies
+                          args.state.enemies.reject! do |enemy|
+                            # That a bullet is touching
+                            bullet.intersect_rect? enemy[:rect]
+                          end
                         end
                       end
 
@@ -197,6 +201,10 @@
                         spawn_enemies args
                         update_enemies args
                         # Move each bullet
+                        args.state.enemy_bullets.reject! do |bullet|
+                          !bullet.intersect_rect? args.grid.rect
+                        end
+
                         args.state.enemy_bullets.each do | bullet |
                           bullet.y -= args.state.enemy_bullet_speed
                         end
@@ -329,6 +337,10 @@
                         spawn_enemies args
                         update_enemies args
 
+                        args.state.enemy_bullets.reject! do |bullet|
+                          !bullet.intersect_rect? args.grid.rect
+                        end
+
                         args.state.enemy_bullets.each do | bullet |
                           bullet.y -= args.state.enemy_bullet_speed
                         end
@@ -342,9 +354,11 @@
                       end
 
                       def update_player_bullets args, player
-                        player.bullets = player.bullets.select do |bullet|
-                          bullet.intersect_rect? args.grid
-                        end.each do |bullet|
+                        player.bullets = player.bullets.find_all do |bullet|
+                          bullet.intersect_rect? args.grid.rect
+                        end
+
+                        player.bullets.each do |bullet|
                           bullet.y += player.bullet_speed
                         end
                       end
@@ -502,6 +516,10 @@
                           player.h,
                         ]
 
+                        args.state.enemy_bullets.reject! do |bullet|
+                          !bullet.intersect_rect? args.grid.rect
+                        end
+
                         args.state.enemy_bullets.each do | bullet |
                           bullet.y -= args.state.enemy_bullet_speed
                           # Reset the game
@@ -518,9 +536,11 @@
                       end
 
                       def update_player_bullets args, player
-                        player.bullets = player.bullets.select do |bullet|
-                          bullet.intersect_rect? args.grid
-                        end.each do |bullet|
+                        player.bullets = player.bullets.find_all do |bullet|
+                          bullet.intersect_rect? args.grid.rect
+                        end
+
+                        player.bullets.each do |bullet|
                           bullet.y += player.bullet_speed
                           # Remove all enemies
                           args.state.enemies.reject! do |enemy|
