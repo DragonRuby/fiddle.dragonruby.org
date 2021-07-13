@@ -64,11 +64,11 @@
          }
         </script>
 
-        <a id="tutorial-menu" href="index.html">menu</a>
-        <a id="tutorial-full" href="#" target="_blank">view full source</a>
+        <a id="tutorial-menu" style="display: none" href="index.html">menu</a>
+        <a id="tutorial-full" href="#" style="display: none" target="_blank">source</a>
         <a id="tutorial-save" href="#" onclick="save(); return false;"><div style="margin-top: 3px">run</div></a>
-        <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;"><div style="margin-top: 3px">prev step</div></a>
-        <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;"><div style="margin-top: 3px">next step</div></a>
+        <a id="tutorial-prev" href="#" style="display: none" onclick="tutorialLoadPreviousStep(); return false;"><div style="margin-top: 3px"><- step</div></a>
+        <a id="tutorial-next" href="#" style="display: none" onclick="tutorialLoadNextStep(); return false;"><div style="margin-top: 3px">step -></div></a>
         <div id="editor-container">
           <div id="editor"></div>
         </div>
@@ -274,6 +274,13 @@
                   text.match(/itemtype/);
          }
 
+         function removeLeadingWhiteSpace(code) {
+           var leadingWhiteSpace = code.split('\n').filter(l => l.trim().length != 0)[0].match(/^[ ]*/)[0] || ""
+           var code = leadingWhiteSpace + code.trim()
+           code = code.split('\n').map(l => l.replace(new RegExp('^' + leadingWhiteSpace + ''), '')).join('\n')
+           return code
+         }
+
          function parseTutorialHtmlAndStart(htmlTutorial) {
            window.tutorial = { steps: { }, totalSteps: 0 };
 
@@ -287,8 +294,7 @@
                   var textElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-text']");
                   var codeElement = e.querySelector("[itemscope='itemscope'][itemtype='tutorial-code']");
                   var leadingWhiteSpace = codeElement.innerText.split('\n').filter(l => l.trim().length != 0)[0].match(/^[ ]*/)[0] || "";
-                  var code = leadingWhiteSpace + codeElement.innerText.trim();
-                  code = code.split('\n').map(l => l.replace(new RegExp('^' + leadingWhiteSpace + ''), '')).join('\n');
+                  var code = removeLeadingWhiteSpace(codeElement.innerText)
                   tutorial.steps[stepNumber] = { text: textElement, code: code };
                   tutorial.totalSteps += 1;
                 });
@@ -302,7 +308,15 @@
          }
 
          function tutorialRetrieve() {
-           if (tutorialUrl().length == 0) { return; }
+           if (tutorialUrl().length == 0) {
+             editor.setValue("" + removeLeadingWhiteSpace(document.getElementById("bouncing-dvd").innerText));
+             setTimeout(() => {
+                 editor.gotoLine(0);
+                 editor.focus()
+             }, 100)
+
+             return;
+           }
 
            document.getElementById("tutorial").innerHTML = "<div>loading tutorial....</div>";
 
@@ -310,6 +324,8 @@
              url: tutorialUrl(),
              crossOrigin: true,
              success: function (resp) {
+               document.getElementById("tutorial-full").style.display = "inline"
+               document.getElementById("tutorial-menu").style.display = "inline"
                document.getElementById("tutorial-full").setAttribute("href", tutorialUrl().replace(/raw$/, ''));
                var script = document.createElement("script");
                script.id = "retrieved-tutorial";
@@ -338,6 +354,147 @@
              </div>
            </body>
          </html>
+        </script>
+        <script type="text/template" id="bouncing-dvd">
+          # Bouncing DVD example
+          def tick args
+            # initialize the defaults for the game
+            defaults args
+
+            # render the game
+            render args
+
+            # check for user input
+            input args
+
+            # run simulation
+            calc args
+          end
+
+          def defaults args
+            # colors for random selection
+            args.state.colors       = [:red,
+                                       :orange,
+                                       :green,
+                                       :blue,
+                                       :indigo,
+                                       :violet]
+
+            # size of the box
+            args.state.box.size     = 10
+
+            # movement speed
+            args.state.box.speed    = 0.1
+
+            # start the box center x
+            args.state.box.x      ||= args.grid.w.half -
+                                      args.state.box.size.half
+
+            # start the box center y
+            args.state.box.y      ||= args.grid.h.half -
+                                      args.state.box.size.half
+
+            # pick a random direction of movement for x
+            args.state.box.dx     ||= [1, -1].sample
+
+            # pick a random direction of movement for y
+            args.state.box.dy     ||= [1, -1].sample
+
+            # state variable that is consulted before moving the box
+            args.state.box.status ||= :moving
+
+            # set the color of the box to a random one
+            set_box_color args    if !args.state.box.color
+          end
+
+          def render args
+            # render the box sprite
+            args.outputs.sprites << {
+              x:    args.state.box.x.round(0),
+              y:    args.state.box.y.round(0),
+              w:    args.state.box.size,
+              h:    args.state.box.size,
+              path: "sprites/square/#{args.state.box.color}.png"
+            }
+
+            # render title and box location
+            args.outputs.labels << {
+              x: 5, y: 5.from_top,
+              text: "Bouncing DVD",
+              size_enum: -8, a: 80
+            }
+
+            args.outputs.labels << {
+              x: 5, y: 12.from_top,
+              text: "x: #{args.state.box.x.to_sf}",
+              size_enum: -8, a: 80
+            }
+
+            args.outputs.labels << {
+              x: 5, y: 19.from_top,
+              text: "y: #{args.state.box.y.to_sf}",
+              size_enum: -8, a: 80
+            }
+          end
+
+          def input args
+            # exit this function if space isn't pressed
+            return unless args.inputs.keyboard.key_down.space
+
+            # toggle the box state
+            if args.state.box.status == :moving
+              args.state.box.status = :stopped
+            else
+              args.state.box.status = :moving
+            end
+          end
+
+          def calc args
+            # do not move the box if the box status isn't :moving
+            return unless args.state.box.status == :moving
+
+            # move the box in the x direction by the speed
+            args.state.box.x += args.state.box.dx * args.state.box.speed
+
+            # move the box in the y direction by the speed
+            args.state.box.y += args.state.box.dy * args.state.box.speed
+
+            # collision logic: determine if the box is outside the
+            # bounds of the 1280x720 canvas if it is, then change
+            # the direction of the box and color
+            if (args.state.box.x +
+                args.state.box.size) > args.grid.w
+              # right side of the canvas check
+              args.state.box.x  = args.grid.w - args.state.box.size
+              args.state.box.dx = -1
+              set_box_color args
+            elsif args.state.box.x < 0
+              # left side of the canvas check
+              args.state.box.x  = 0
+              args.state.box.dx = 1
+              set_box_color args
+            end
+
+            if (args.state.box.y +
+                args.state.box.size) > args.grid.h
+              # top of the canvas check
+              args.state.box.y  = args.grid.h - args.state.box.size
+              args.state.box.dy = -1
+              set_box_color args
+            elsif args.state.box.y < 0
+              # bottom of the canvas check
+              args.state.box.y  = 0
+              args.state.box.dy = 1
+              set_box_color args
+            end
+          end
+
+          # helper method for setting the box's color
+          def set_box_color args
+            # to something other than its current color
+            args.state.box.color = (args.state.colors -
+                                    [args.state.box.color]).sample
+          end
         </script>
     </body>
 </html>
