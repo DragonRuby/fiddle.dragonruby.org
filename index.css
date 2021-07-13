@@ -129,33 +129,53 @@ a:visited { color: white; }
 }
 
 #tutorial-menu {
-    left: 490px;
-    top: 245px;
+    width: 90px;
+    height: 18px;
+    left: 718px;
+    display: inline;
+    text-align: center;
+    text-decoration: none;
+    top: 240px;
     color: #FFFFFF;
     z-index: 100;
     position: absolute;
     font-weight: 900;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 0.9em;
     z-index: 100;
+    border: solid 1px #ffffff;
+    background-color: #000000;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #tutorial-full {
-    left: 760px;
-    top: 245px;
+    width: 90px;
+    height: 18px;
+    left: 838px;
+    display: inline;
+    text-align: center;
+    text-decoration: none;
+    top: 240px;
     color: #FFFFFF;
     z-index: 100;
     position: absolute;
     font-weight: 900;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 0.9em;
     z-index: 100;
+    border: solid 1px #ffffff;
+    background-color: #000000;
+    padding: 3px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 #tutorial-save {
     width: 90px;
     height: 18px;
-    left: 360px;
+    left: 30px;
     display: inline;
     text-align: center;
     text-decoration: none;
@@ -177,7 +197,7 @@ a:visited { color: white; }
 #tutorial-next {
     width: 90px;
     height: 18px;
-    left: 240px;
+    left: 270px;
     text-decoration: none;
     text-align: center;
     top: 5px;
@@ -198,7 +218,7 @@ a:visited { color: white; }
 #tutorial-prev {
     width: 90px;
     height: 18px;
-    left: 120px;
+    left: 150px;
     text-decoration: none;
     text-align: center;
     top: 5px;
