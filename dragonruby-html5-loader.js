@@ -712,7 +712,7 @@ if (!hasWebAssembly) {
   Module.setStatus("Your browser doesn't have WebAssembly support. Please upgrade.");
 } else {
   var buildtype = "wasm";
-  var module = "dragonruby-" + buildtype + ".js";
+  var module = "dragonruby-" + buildtype + ".js?version=7fb4a4a9-3d26-4299-9809-6039f6c5b89e";
   window.gtk = {};
   window.gtk.module = Module;
 
