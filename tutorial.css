@@ -27,7 +27,7 @@ body {
     width: 480px;
     background-color: rgb(40, 44, 52);
     font-family: 'firacode';
-    font-size: 16px;
+    font-size: 14px;
     color: #ffffff;
     line-height: 1.2em;
 }
@@ -90,13 +90,13 @@ pre code {
     padding: 0.5em;
     background-color: rgb(50, 54, 62) !important;
     color: rgb(50, 54, 62);
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .hljs {
     background-color: rgb(50, 54, 62) !important;
     color: rgb(252, 253, 252) !important;
-    font-size: 16px;
+    font-size: 14px;
 }
 
 .hljs-keyword {
@@ -107,6 +107,29 @@ pre code {
     color: rgb(250, 220, 100) !important;
 }
 
+.hljs-string {
+    color: rgb(255, 100, 100) !important;
+}
+
 .hljs-number {
     color: rgb(255, 100, 100) !important;
 }
+
+.hljs-drgtk {
+    color: rgb(220, 220, 220) !important;
+    font-weight: 900;
+}
+
+.hljs-comment {
+    color :rgb(180, 255, 200) !important;
+}
+
+a {
+    background-color: rgb(50, 180, 180);
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 5px;
+    font-weight: 900;
+    color: #151515;
+}
+a:visited { color: #151515; }

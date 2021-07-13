@@ -1,6 +1,10 @@
 var styleElement = document.createElement('style');
 document.getElementsByTagName("head")[0].appendChild(styleElement);
 
+document.addEventListener('load', () => {
+  hljs.getLanguage('ruby').keywords += ' args tick ';
+})
+
 document.addEventListener("animationstart", e => {
   if (e.animationName == "node-ready") {
     var code = e.target.innerHTML.replace(/^\n/, "");
@@ -11,6 +15,12 @@ document.addEventListener("animationstart", e => {
       var whiteSpace = leadingWhiteSpace[0];
       code = code.split('\n').map(l => l.replace(new RegExp('^' + whiteSpace + ''), '')).join('\n');
     }
+
+    code = code.replace(/args\.outputs\.sprites/g, '<span class="hljs-drgtk">args.outputs.sprites</span>')
+    code = code.replace(/args\.outputs\.labels/g, '<span class="hljs-drgtk">args.outputs.labels</span>')
+    code = code.replace(/args\.state\.tick_count/g, '<span class="hljs-drgtk">args.state.</span><span class="hljs-drgtk">tick_count</span>')
+    code = code.replace(/args\.state\./g, '<span class="hljs-drgtk">args.state</span>.')
+    code = code.replace(/args\.inputs\.keyboard/g, '<span class="hljs-drgtk">args.inputs.keyboard</span>')
 
     e.target.innerHTML = code;
     hljs.highlightBlock(e.target);
