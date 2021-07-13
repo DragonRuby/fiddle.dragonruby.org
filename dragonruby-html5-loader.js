@@ -16,7 +16,7 @@ function syncDataFiles(dbname, baseurl)
     //  once we're shipping, and it defeats Cloudflare cacheing, causing it
     //  to abuse Amazon S3, etc.)
     var urlrandomizerarg = '';
-    if (false) {
+    if (true) {
         urlrandomizerarg = "?nocache=" + (Date.now() / 1000 | 0);
     }
 
@@ -398,9 +398,9 @@ document.getElementById('borderdiv').style.border = '0px';
 //document.getElementById('progressdiv').style.display = 'none';
 document.getElementById('output').style.display = 'none';
 
-// if (!window.parent.window.gtk) {
-//   window.parent.window.gtk = {};
-// }
+if (!window.parent.window.gtk) {
+  window.parent.window.gtk = {};
+}
 
 window.parent.window.gtk.saveMain = function(text) {
   FS.writeFile('app/main.rb', text);
@@ -545,9 +545,9 @@ var Module = {
         div.removeEventListener('click', Module.clickToPlayListener);
         document.body.removeChild(div);
     }
-    // if (window.parent.window.gtk.starting) {
-    //   window.parent.window.gtk.starting();
-    // }
+    if (window.parent.window.gtk.starting) {
+      window.parent.window.gtk.starting();
+    }
 
     startGame();  // go go go!
   },
