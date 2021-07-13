@@ -1,31 +1,45 @@
 <html>
     <head>
-        <title>DragonRuby Game Toolkit - Moving a Sprite</title>
+        <title>DragonRuby Game Toolkit - Hello World</title>
         <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
         <script src="tutorial.js"></script>
         <link rel="stylesheet" href="tutorial.css" />
     </head>
     <body>
-        <h1>DragonRuby Game Toolkit - Moving a Sprite</h1>
+      <h1>Hey Listen!</h1
+      <p>
+        You can try out this tutorial interactively <a href="http://fiddle.dragonruby.org?tutorial=http://fiddle.dragonruby.org/tutorial-hello-world.html" target="_blank">here</a>.
+      </p>
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
             <div itemscope="itemscope" itemtype="tutorial-text">
                 <h1>Hello World</h1>
-                In this tutorial, we'll cover how to move a sprite. We'll start off with
-                a empty canvas with a dark gray color.
+                <p>
+                  In this tutorial, we'll cover how to move a player around
+                  using the keyboard.
+                </p>
+
+                <p>
+                  DragonRuby requires you to define a <code>method</code> called <code>tick</code>. This <code>tick</code>
+                  method is called on your behalf at the rate of sixty times per second.
+                </p>
+
+                <p>The code you're currently looking at renders a label to the screen and prints the current frame.</p>
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
                     <code class="language-ruby" itemprop="text">
-                    # entry point to game
+                    # this is how you define the tick method in DragonRuby
                     def tick args
-                      # set the game's background color
-                      # try changing these numbers and seeing how
-                      # the background color changes
-                      args.outputs.background_color = [40, 44, 52]
+                      # this is how a label is rendered to the screen
+                      args.outputs.labels << {
+                        x:    30,
+                        y:    30,
+                        text: args.state.tick_count
+                      }
                     end
 
-                    # reset the game on save
+                    # reset the game if we save
                     $gtk.reset
                     </code>
                 </pre>
@@ -34,49 +48,31 @@
 
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
             <div itemscope="itemscope" itemtype="tutorial-text">
-                <h1>Drawing A Sprite</h1>
-                Here is how you add a sprite to the screen.
+                <h1>Rendering a Square</h1>
+                <p>
+                  Now that you have a <code>tick</code> method defined. Let's render a green square to the screen.
+                  This will represent your player character.
+                </p>
+                <p>
+                  For rendering <code>labels</code>, we use <code>args.outputs.labels</code>. To render <code>sprites</code>, we
+                  use <code>args.outputs.sprites</code>. A sprite needs to provide its <code>x</code> location, its <code>y</code> location,
+                  its <code>w</code> (width), its <code>h</code> (height), and a <code>path</code> (file path for the image).
+                </p>
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
                     <code class="language-ruby" itemprop="text">
                     def tick args
-                      # add a sprite
-                      # try change these numbers to see
-                      # how the sprite changes
-                      args.outputs.sprites << [
-                         0,                         # X
-                         0,                         # Y
-                        20,                         # W
-                        20,                         # H
-                        'sprites/square-green.png', # PATH
-                      ]
-
-                      # list of sprites you have availble to you:
-                      # colors of the rainbow ROY G BIV.
-                      # - sprites/square-red.png
-                      # - sprites/square-orange.png
-                      # - sprites/square-yellow.png
-                      # - sprites/square-green.png
-                      # - sprites/square-blue.png
-                      # - sprites/square-indigo.png
-                      # - sprites/square-violet.png
-                      # - sprites/square-black.png
-                      # - sprites/square-white.png
-                      # - sprites/circle-red.png
-                      # - sprites/circle-orange.png
-                      # - sprites/circle-yellow.png
-                      # - sprites/circle-green.png
-                      # - sprites/circle-blue.png
-                      # - sprites/circle-indigo.png
-                      # - sprites/circle-violet.png
-                      # - sprites/circle-black.png
-                      # - sprites/circle-white.png
-
-                      args.outputs.background_color = [40, 44, 52]
+                      # this is how a sprite is rendered to the screen
+                      args.outputs.sprites << {
+                        x:     0,
+                        y:     0,
+                        w:    16,
+                        h:    16,
+                        path: 'sprites/square/green.png'
+                      }
                     end
 
-                    # reset the game on save
                     $gtk.reset
                     </code>
                 </pre>
@@ -85,46 +81,205 @@
 
         <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
             <div itemscope="itemscope" itemtype="tutorial-text">
-                <h1>Moving The Sprite</h1>
-                The <code>tick</code> method is executed <code>60</code> times a second. To
-                store the location of a sprite accross frames, we need to store it in <code>args.state</code>.
+                <h1>Storing Variables</h1>
+                <p>
+                  We have to store the player's position over time. We do this using DragonRuby's <code>args.state</code>
+                  function.
+                </p>
+                <p>
+                  Take a look at the code to see how we define the player's properties as <code>state</code> variables.
+                  You'll notice the use of the <code>||=</code> symbol (it's referred to as "or equals"). This symbol tells
+                  DragonRuby to <i>only</i> set a <code>state</code> property if it's never been set before.
+                </p>
+                <p>
+                  We will update the player's <code>x</code> position one time every tick. You'll see the player move
+                  across the screen.
+                </p>
             </div>
             <div itemscope="itemscope" itemtype="tutorial-code">
                 <pre>
                     <code class="language-ruby" itemprop="text">
                     def tick args
-                      # initialize the x location once
-                      # using Ruby's ||= operator
-                      args.state.x ||= 0
-                      args.state.y ||= 0
+                      # set the player's state
+                      # only set the player's starting properties
+                      # once using the ||= operator.
+                      args.state.player.x ||=  0
+                      args.state.player.y ||=  0
+                      args.state.player.w ||= 16
+                      args.state.player.h ||= 16
 
-                      # every tick, increment the location
-                      # of the sprite by 1
-                      args.state.x += 1
-                      args.state.y += 1
+                      args.outputs.sprites << {
+                        x:     args.state.player.x,
+                        y:     args.state.player.y,
+                        w:     args.state.player.w,
+                        h:     args.state.player.h,
+                        path: 'sprites/square/green.png'
+                      }
 
-                      # if the sprite is off the screen
-                      # move it back to the original position
-                      # the size of this canvas is
-                      # 160 pixels by 90 pixels
-                      if args.state.x > 160
-                        args.state.x = -10
+                      # update the players x location once every tick
+                      args.state.player.x += 2
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Keyboard Input</h1>
+                <p>
+                  The player automatically moves to the right every frame, but we want to control
+                  the player's movement using the keyboard.
+                </p>
+                <p>
+                  We'll use a conditional statement called an <code>if</code> statement to only move the player
+                  if we have held down the <code>right</code> arrow key. DragonRuby provides all keyboard data
+                  via <code>args.inputs.keyboard</code>.
+                </p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      args.state.player.x ||=  0
+                      args.state.player.y ||=  0
+                      args.state.player.w ||= 16
+                      args.state.player.h ||= 16
+
+                      args.outputs.sprites << {
+                        x:    args.state.player.x,
+                        y:    args.state.player.y,
+                        w:    args.state.player.w,
+                        h:    args.state.player.h,
+                        path: 'sprites/square/green.png'
+                      }
+
+                      # update the players x location only if ~right~
+                      # is pressed or held on the keyboard
+                      if args.inputs.keyboard.right
+                        args.state.player.x += 2
+                      end
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="5">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Keyboard Input All Directions</h1>
+                <p>
+                  We use multiple conditional statements, called <code>if/elsif</code> conditionals,
+                  to handle all keyboard input.
+                </p>
+                <p>
+                  We'll use a conditional statement called an <code>if</code> statement to only move the player
+                  if we have held down the <code>right</code> arrow key. DragonRuby provides all keyboard data
+                  via <code>args.inputs.keyboard</code>.
+                </p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      args.state.player.x ||=  0
+                      args.state.player.y ||=  0
+                      args.state.player.w ||= 16
+                      args.state.player.h ||= 16
+
+                      args.outputs.sprites << {
+                        x:    args.state.player.x,
+                        y:    args.state.player.y,
+                        w:    args.state.player.w,
+                        h:    args.state.player.h,
+                        path: 'sprites/square/green.png'
+                      }
+
+                      if args.inputs.keyboard.right
+                        # update the players x location only if
+                        # ~right~ is pressed or held on the keyboard
+                        args.state.player.x += 2
+                      elsif args.inputs.keyboard.left
+                        # ~left~ is pressed or held on the keyboard
+                        args.state.player.x -= 2
                       end
 
-                      if args.state.y > 90
-                        args.state.y = -10
+                      if args.inputs.keyboard.up
+                        # ~up~ is pressed or held on the keyboard
+                        args.state.player.y += 2
+                      elsif args.inputs.keyboard.down
+                        # ~down~ is pressed or held on the keyboard
+                        args.state.player.y -= 2
+                      end
+                    end
+
+                    $gtk.reset
+                    </code>
+                </pre>
+            </div>
+        </div>
+
+        <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="6">
+            <div itemscope="itemscope" itemtype="tutorial-text">
+                <h1>Out of Bounds</h1>
+                <p>
+                  Finally, we make sure the player can't go outside of the play
+                  area which is defined in DragonRuby via <code>args.grid</code>.
+                </p>
+                <p>
+                  We use a combination of <code>args.grid</code> and a mathematical
+                  function called <code>clamp</code> to make sure the player's
+                  properties are "clamped" to a minimum and maximum value.
+                </p>
+                <p>
+                  Boom. You've just learned how to move a player around. Congrats.
+                </p>
+            </div>
+            <div itemscope="itemscope" itemtype="tutorial-code">
+                <pre>
+                    <code class="language-ruby" itemprop="text">
+                    def tick args
+                      args.state.player.x ||=  0
+                      args.state.player.y ||=  0
+                      args.state.player.w ||= 16
+                      args.state.player.h ||= 16
+
+                      args.outputs.sprites << {
+                        x:    args.state.player.x,
+                        y:    args.state.player.y,
+                        w:    args.state.player.w,
+                        h:    args.state.player.h,
+                        path: 'sprites/square/green.png'
+                      }
+
+                      if args.inputs.keyboard.right
+                        args.state.player.x += 2
+                      elsif args.inputs.keyboard.left
+                        args.state.player.x -= 2
                       end
 
-                      # render the sprite based on state
-                      args.outputs.sprites << [
-                        args.state.x,               # X
-                        args.state.y,               # Y
-                        20,                         # W
-                        20,                         # H
-                        'sprites/square-green.png', # PATH
-                      ]
+                      if args.inputs.keyboard.up
+                        args.state.player.y += 2
+                      elsif args.inputs.keyboard.down
+                        args.state.player.y -= 2
+                      end
 
-                      args.outputs.background_color = [40, 44, 52]
+                      # make sure the player's x and y position
+                      # are clamped to the the grid's minimum and
+                      # maximum width and height
+                      args.state.player.x = args.state.player.x.clamp(
+                        args.grid.left,
+                        args.grid.right - args.state.player.w
+                      )
+
+                      args.state.player.y = args.state.player.y.clamp(
+                        args.grid.bottom,
+                        args.grid.top - args.state.player.h
+                      )
                     end
 
                     $gtk.reset
