@@ -1,0 +1,272 @@
+<html>
+  <head>
+    <title>DragonRuby Game Toolkit - Hello World</title>
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/highlight.min.js"></script>
+    <script src="tutorial.js"></script>
+    <link rel="stylesheet" href="tutorial.css" />
+  </head>
+  <body>
+    <h1>Hey Listen!</h1
+    <p>
+      You can try out this tutorial interactively <a href="/index.html?tutorial=/tutorial-player-jump.html" target="_blank">here</a>.
+    </p>
+    <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="1">
+      <div itemscope="itemscope" itemtype="tutorial-text">
+        <h1>Get a Player Jumping Like Mario</h1>
+        <p>
+          Let's get a player jumping vertically like Mario. We start by rendering a player on the screen. With
+          some default values initialized.
+        </p>
+      </div>
+      <div itemscope="itemscope" itemtype="tutorial-code">
+        <pre>
+          <code class="language-ruby" itemprop="text">
+            def tick args
+              # place the player in the center of the
+              # grid horizontally and on the floor (y = 0)
+              args.state.player.x    ||= args.grid.w.half
+              args.state.player.y    ||= 0
+              args.state.player.size ||= 10
+
+              # render the player on the screen
+              # taking into consideration the player's
+              # size to center them
+              args.outputs.sprites << {
+                x: args.state.player.x -
+                   args.state.player.size.half,
+                y: args.state.player.y,
+                w: args.state.player.size,
+                h: args.state.player.size,
+                path: 'sprites/square/red.png'
+              }
+            end
+          </code>
+        </pre>
+      </div>
+    </div>
+
+    <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="2">
+      <div itemscope="itemscope" itemtype="tutorial-text">
+        <h1>Zero Gravity Jump</h1>
+        <p>
+          Now let's make the player (sort of) jump when <code>space</code> is pressed. We accomplish
+          this by setting a <code>dy</code> property on the player (<code>delta y</code>) (this value is added
+          to the players location every frame).
+        </p>
+        <p>
+          When you press <code>space</code>, you'll notice the player jumps, flying upwards... forever...
+        </p>
+        <p>
+          Which is why we also make it so that pressing <code>r</code> resets the players <code>y</code>, and <code>dy</code>.
+        </p>
+      </div>
+      <div itemscope="itemscope" itemtype="tutorial-code">
+        <pre>
+          <code class="language-ruby" itemprop="text">
+          def tick args
+            args.state.player.x    ||= args.grid.w.half
+            args.state.player.y    ||= 0
+            args.state.player.size ||= 10
+            # define dy for the player
+            args.state.player.dy   ||= 0
+
+            # define jump power
+            args.state.jump.power = 10
+
+            args.outputs.sprites << {
+              x: args.state.player.x -
+                 args.state.player.size.half,
+              y: args.state.player.y,
+              w: args.state.player.size,
+              h: args.state.player.size,
+              path: 'sprites/square/red.png'
+            }
+
+            # set dy equal to jump power if space is pressed
+            if args.inputs.keyboard.key_down.space
+              args.state.player.dy = args.state.jump.power
+            end
+
+            # reset the player's y and dy if r
+            # is pressed on the keyboard
+            if args.inputs.keyboard.key_down.r
+              args.state.player.y  = 0
+              args.state.player.dy = 0
+            end
+
+            # increase the player's y by dy every frame
+            args.state.player.y += args.state.player.dy
+          end
+          </code>
+        </pre>
+      </div>
+    </div>
+
+    <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="3">
+      <div itemscope="itemscope" itemtype="tutorial-text">
+        <h1>Adding Gravity</h1>
+        <p>
+          To bring the player back to the ground, we need to add some gravity
+          which is applied when the player is jumping.
+
+          We'll keep track of the player's current <code>action</code> as either <code>:standing</code> or
+          <code>:jumping</code> and use that to decide if the player can jump or if gravity can be applied.
+        </p>
+      </div>
+      <div itemscope="itemscope" itemtype="tutorial-code">
+        <pre>
+          <code class="language-ruby" itemprop="text">
+          def tick args
+            args.state.player.x      ||= args.grid.w.half
+            args.state.player.y      ||= 0
+            args.state.player.size   ||= 10
+            args.state.player.dy     ||= 0
+            # keep track of the player's current action
+            args.state.player.action ||= :jumping
+
+            args.state.jump.power = 10
+
+            # define gravity
+            args.state.gravity    = -1
+
+            args.outputs.sprites << {
+              x: args.state.player.x -
+                 args.state.player.size.half,
+              y: args.state.player.y,
+              w: args.state.player.size,
+              h: args.state.player.size,
+              path: 'sprites/square/red.png'
+            }
+
+            if args.inputs.keyboard.key_down.space
+              # player can only jump if they are standing
+              if args.state.player.action == :standing
+                # set the player's action to jumping
+                args.state.player.action = :jumping
+                args.state.player.dy     = args.state.jump.power
+              end
+            end
+
+            if args.inputs.keyboard.key_down.r
+              args.state.player.y  = 0
+              args.state.player.dy = 0
+            end
+
+            # apply gravity and dy if the player is jumping
+            if args.state.player.action == :jumping
+              args.state.player.y  += args.state.player.dy
+              args.state.player.dy += args.state.gravity
+            end
+
+            # set the action to :standing when
+            # the player hits the ground
+            if args.state.player.y < 0
+              args.state.player.y      = 0
+              args.state.player.action = :standing
+            end
+          end
+          </code>
+        </pre>
+      </div>
+    </div>
+    <div itemscope="itemscope" itemtype="tutorial-step" data-step-number="4">
+      <div itemscope="itemscope" itemtype="tutorial-text">
+        <h1>Short Hopping</h1>
+        <p>
+          Mario style short hopping can be accomplished by:
+        </p>
+        <ol>
+          <li>Recording when the jump has occurred: <code>player.action_at</code>.</li>
+          <li>Defining how long the jump can increase: <code>jump.increase_frames</code>.</li>
+          <li>Defining the magnitude increase power: <code>jump.increase_power</code>.</li>
+          <li>Determine if <code>space</code> is being held within the allowed jump frames. And if so, increase the player's <code>dy</code>.</li>
+        </ol>
+      </div>
+      <div itemscope="itemscope" itemtype="tutorial-code">
+        <pre>
+          <code class="language-ruby" itemprop="text">
+          def tick args
+            args.state.player.x      ||= args.grid.w.half
+            args.state.player.y      ||= 0
+            args.state.player.size   ||= 10
+            args.state.player.dy     ||= 0
+            args.state.player.action ||= :jumping
+
+            # change the jump power to
+            # just be the short hop power
+            args.state.jump.power           = 5
+            # define how many frames power
+            # is allowed to increase
+            args.state.jump.increase_frames = 15
+            # define how big the increase power is
+            args.state.jump.increase_power  = 1
+
+            args.state.gravity              = -1
+
+            args.outputs.sprites << {
+              x: args.state.player.x -
+                 args.state.player.size.half,
+              y: args.state.player.y,
+              w: args.state.player.size,
+              h: args.state.player.size,
+              path: 'sprites/square/red.png'
+            }
+
+            if args.inputs.keyboard.key_down.space
+              if args.state.player.action == :standing
+                args.state.player.action = :jumping
+                args.state.player.dy = args.state.jump.power
+
+                # record when the action took place
+                current_frame = args.state.tick_count
+                args.state.player.action_at = current_frame
+              end
+            end
+
+            # if the space bar is being held
+            if args.inputs.keyboard.key_held.space
+              # is the player jumping
+              is_jumping = args.state.player.action == :jumping
+
+              # when was the jump performed
+              time_of_jump = args.state.player.action_at
+
+              # how much time has passed since the jump
+              jump_elapsed_time = time_of_jump.elapsed_time
+
+              # how much time is allowed for increasing power
+              time_allowed = args.state.jump.increase_frames
+
+              # if the player is jumping
+              # and the elapsed time is less than
+              # the allowed time
+              if is_jumping && jump_elapsed_time < time_allowed
+                 # increase the dy by the increase power
+                 power_to_add = args.state.jump.increase_power
+                 args.state.player.dy += power_to_add
+              end
+            end
+
+            if args.inputs.keyboard.key_down.r
+              args.state.player.y  = 0
+              args.state.player.dy = 0
+            end
+
+            if args.state.player.action == :jumping
+              args.state.player.y  += args.state.player.dy
+              args.state.player.dy += args.state.gravity
+            end
+
+            if args.state.player.y < 0
+              args.state.player.y      = 0
+              args.state.player.action = :standing
+            end
+          end
+          </code>
+        </pre>
+      </div>
+    </div>
+    <footer id="bottom"></footer>
+  </body>
+</html>
